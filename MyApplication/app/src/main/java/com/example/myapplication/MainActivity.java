@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -18,7 +17,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
 public class MainActivity extends AppCompatActivity {
     public static final String FIRST_TIME = "first_time";
@@ -73,26 +71,6 @@ public class MainActivity extends AppCompatActivity {
             new NamePosPair("Iskaffe", 5), new NamePosPair("Geisha", 2), new NamePosPair("Sockerkaka", 3),
             new NamePosPair("Tvålull", 4), new NamePosPair("Cookies", 8), new NamePosPair("Kryddmix", 3), new NamePosPair("Paprika chili", 3)
     };
-    int t_rMin = 10;
-    int t_rMax = 40;
-    int t_gMin = 10;
-    int t_gMax = 40;
-    int t_bMin = 10;
-    int t_bMax = 40;
-
-    int c_rMin = 85;
-    int c_rMax = 103;
-    int c_gMin = 102;
-    int c_gMax = 133;
-    int c_bMin = 87;
-    int c_bMax = 107;
-
-    int uc_rMin = 185;
-    int uc_rMax = 186;
-    int uc_gMin = 148;
-    int uc_gMax = 172;
-    int uc_bMin = 119;
-    int uc_bMax = 130;
     int found = 0;
     boolean need_to_be_incremented = false;
     TextView sd_num_view;
