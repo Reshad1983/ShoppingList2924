@@ -137,7 +137,6 @@ public class MainActivity extends AppCompatActivity {
                         sdb.updatePrice(price, search_name_pos[0]);
                         Toast.makeText(this, "Item updated!!", Toast.LENGTH_LONG).show();
                     }
-
                 }
                 else
                 {
@@ -282,6 +281,15 @@ public class MainActivity extends AppCompatActivity {
         });
         List<NameStatusPair> items = sdb.getItemsSortedByUsage();
         sd_num_view.setText(String.format("%d",items.size()));
+        sd_num_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<NameStatusPair> items = sdb.getItemsSortedByUsage();
+                list_view.removeAllViews();
+                add_items_to_view(items);
+
+            }
+        });
        add_items_to_view(items);
     }
     //----------------------------------------------------------------------------------------------------------
