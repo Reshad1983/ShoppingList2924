@@ -69,11 +69,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // Remove an item by name
-    public boolean removeItem(String name) {
+    public void removeItem(String name) {
+        String [] item_to_delete = name.split(System.lineSeparator(), -2);
         SQLiteDatabase db = this.getWritableDatabase();
-        db.delete(TABLE_ITEMS, COLUMN_NAME + " = ?", new String[]{name});
+        String query = "DELETE FROM " + TABLE_ITEMS + " WHERE " +COLUMN_NAME + " = ?" ;
+        db.execSQL(query, new String []{item_to_delete[0]} );
+        db.execSQL(query);
         db.close();
-        return false;
     }
 
     // Increment the usage count of an item by name

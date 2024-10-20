@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
     LinearLayout search_layout;
     public DatabaseHelper sdb;
     int total_to_buy = 0;
-
+boolean sorting = true;
     EditText search_item;
     ScrollView sc_view;
     protected void onCreate(Bundle savedInstanceState) {
@@ -222,22 +222,6 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "Usage reset!", Toast.LENGTH_LONG).show();
                     found = 1;
                 }
-
-                else if ((search_text.trim().length() == 1) && search_text.equals("u") )
-                {
-                    items = sdb.getItemsSortedByUsage();
-                    sd_num_view.setText(String.format("%d",search_items.size()));
-                    sd_num_view.setBackgroundResource(R.drawable.checked);
-                    add_items_to_view(search_items);
-
-                    sc_view.fullScroll(ScrollView.FOCUS_UP);
-                    search_item.setText("");
-                    InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
-                    add_items_to_view(items);
-                    sd_num_view.setText(String.format("%d",items.size()));
-
-                }
                 else if ((search_text.trim().length() == 1) && (Integer.parseInt(search_text) < 10) && (Integer.parseInt(search_text) > 0) )
                 {
                     items = sdb.getItemsSortedByUsageAndStatus();
@@ -256,8 +240,8 @@ public class MainActivity extends AppCompatActivity {
                     InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
                     imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
                 }
-
-               else {
+               else
+               {
                     items = sdb.getItemsSortedByUsageAndStatus();
                     for (NameStatusPair item : items) {
                         if (item.getName().trim().toLowerCase().contains(search_text.trim().toLowerCase())) {
@@ -281,13 +265,23 @@ public class MainActivity extends AppCompatActivity {
         });
         List<NameStatusPair> items = sdb.getItemsSortedByUsage();
         sd_num_view.setText(String.format("%d",items.size()));
-        sd_num_view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                List<NameStatusPair> items = sdb.getItemsSortedByUsage();
-                list_view.removeAllViews();
-                add_items_to_view(items);
+        sd_num_view.setBackgroundResource(R.drawable.usage);
+        sd_num_view.setOnClickListener(v -> {
+            list_view.removeAllViews();
+            if(sorting)
+            {
+                List<NameStatusPair> items1 = sdb.getItemsSortedByUsage();
+                v.setBackgroundResource(R.drawable.usage);
+                add_items_to_view(items1);
+                sorting = !sorting;
+            }
+            else
+            {
 
+                List<NameStatusPair> items1 = sdb.getItemsSortedByUsageAndStatus();
+                v.setBackgroundResource(R.drawable.position);
+                add_items_to_view(items1);
+                sorting = !sorting;
             }
         });
        add_items_to_view(items);
@@ -361,14 +355,11 @@ public class MainActivity extends AppCompatActivity {
             search_item.setText("");
             return true;
         });
-        item_name.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(item.getStatus().equals("1"))
-                {
-                    total_to_buy += Integer.parseInt(item.getPrice());
-                    sum_view.setText(total_to_buy + " sek");
-                }
+        item_name.setOnClickListener(v -> {
+            if(item.getStatus().equals("1"))
+            {
+                total_to_buy += Integer.parseInt(item.getPrice());
+                sum_view.setText(total_to_buy + " sek");
             }
         });
         item_pos.setText("pos: " + item.getPos() );
