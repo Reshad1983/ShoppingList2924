@@ -123,49 +123,63 @@ boolean sorting = true;
             {
                 int pos = 0;
                 int price = 0 ;
-                if(search_name_pos.length > 2)
+                if(search_name_pos.length == 3)
                 {
                     try
                     {
                         price = Integer.parseInt(search_name_pos[2]);
+                        pos = Integer.parseInt(search_name_pos[1]);
                     }
                     catch (Resources.NotFoundException e) {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
                     if (price > 0) {
-
-                        sdb.updatePrice(price, search_name_pos[0]);
-                        Toast.makeText(this, "Item updated!!", Toast.LENGTH_LONG).show();
+                        sdb.add_item_price(search_name_pos[0], pos, price);
+                        Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
                     }
                 }
-                else
+                else if(search_name_pos.length == 4)
                 {
-                    if (Integer.parseInt(search_name_pos[1]) > 9)
+                    try
                     {
-                        try
-                        {
-                            price = Integer.parseInt(search_name_pos[1]);
-                        }
-                        catch (Resources.NotFoundException e) {
+                        price = Integer.parseInt(search_name_pos[3]);
+                        pos = Integer.parseInt(search_name_pos[2]);
+                    }
+                    catch (Resources.NotFoundException e) {
+                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
+                    }
+                    if (price > 0) {
+                        sdb.add_item_price(search_name_pos[0]+" "+search_name_pos[1], pos, price);
+                        Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
+                    }
+
+                }
+                else if(search_name_pos.length == 1) {
+                    if (is_a_number(search_name_pos[0]))
+                    {
+                        try {
+                            price = Integer.parseInt(search_name_pos[0]);
+                        } catch (Resources.NotFoundException e) {
                             Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                         }
                         sdb.updatePrice(price, search_name_pos[0]);
                         Toast.makeText(this, "Item updated!!", Toast.LENGTH_LONG).show();
                     }
-                    else
-                    {
-                        try
-                        {
-                            pos = Integer.parseInt(search_name_pos[1]);
-                        }
-                        catch (Resources.NotFoundException e) {
-                            Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
-                        }
-
-                        sdb.addItem(search_name_pos[0], pos);
-                        Toast.makeText(this, "New Item added!", Toast.LENGTH_LONG).show();
-                    }
                 }
+                else if(search_name_pos.length == 2)
+                {
+                    try
+                    {
+                        pos = Integer.parseInt(search_name_pos[1]);
+                    }
+                    catch (Resources.NotFoundException e) {
+                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
+                    }
+
+                    sdb.addItem(search_name_pos[0], pos);
+                    Toast.makeText(this, "New Item added!", Toast.LENGTH_LONG).show();
+                }
+
                 search_item.setText("");
             }
             List<NameStatusPair> items = sdb.getItemsSortedByUsageAndStatus();
@@ -190,6 +204,8 @@ boolean sorting = true;
                         if(item.getStatus().equals("2") )
                         {
                             sdb.updateStatus(0, item.getName());
+                            sdb.set_priority(item.getName(), 0);
+                            item.set_prio("0");
                         }
                         else if(item.getStatus().equals("1"))
                         {
@@ -214,7 +230,6 @@ boolean sorting = true;
                 }
                 else if(search_text.equals("0"))
                 {
-
                     sdb.reset_usage();
                     search_item.setText("");
                     items = sdb.getItemsSortedByUsageAndStatus();
@@ -309,7 +324,16 @@ boolean sorting = true;
                 break;
             case "1":
                 item_name.setTextColor(Color.BLACK);
-                item_name.setBackgroundResource(R.drawable.unchecked);
+                if(item.getPrio().equals("1"))
+                {
+
+                    item_name.setBackgroundResource(R.drawable.prio);
+                }
+                else
+                {
+                    item_name.setBackgroundResource(R.drawable.unchecked);
+
+                }
                 total_to_buy += Integer.parseInt(item.getPrice());
                 sum_view.setText(total_to_buy + " sek");
 
@@ -345,6 +369,16 @@ boolean sorting = true;
                     item_name.setText(item.getName());
                     item_name.append("\n" + search_item.getText().toString() + " sek");
                 }
+                else
+                {
+                    String new_name = search_item.getText().toString();
+                    sdb.update_item_name(new_name , item.getName());
+                    item.set_name(new_name);
+                    Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
+                    item_name.setText(item.getName());
+                    item_name.append("\n" + item.getPrice()+ " sek");
+
+                }
             }
             else
             {
@@ -358,8 +392,19 @@ boolean sorting = true;
         item_name.setOnClickListener(v -> {
             if(item.getStatus().equals("1"))
             {
-                total_to_buy += Integer.parseInt(item.getPrice());
-                sum_view.setText(total_to_buy + " sek");
+                if(item.getPrio().equals("0"))
+                {
+
+                    sdb.set_priority(item.getName(), 1);
+                    item.set_prio("1");
+                    item_name.setBackgroundResource(R.drawable.prio);
+                }
+                else
+                {
+                    sdb.set_priority(item.getName(), 0);
+                    item.set_prio("0");
+                    item_name.setBackgroundResource(R.drawable.unchecked);
+                }
             }
         });
         item_pos.setText("pos: " + item.getPos() );
@@ -435,6 +480,7 @@ boolean sorting = true;
                         item_name.append("\n" + item.getPrice() + " sek");
                         item_used.setText(item.getUsage()+ " ggr");
                         sdb.updateStatus(no_status, item.getName());
+                        sdb.set_priority(item.getName(), 0);
                     }
                     total_to_buy -= Integer.parseInt(item.getPrice());
                     sum_view.setText(Math.max(total_to_buy, 0) + " sek");

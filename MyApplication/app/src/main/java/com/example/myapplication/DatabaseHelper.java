@@ -13,7 +13,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database Name and Version
     private static final String DATABASE_NAME = "items.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     // Table and Columns
     private static final String TABLE_ITEMS = "items";
     private static final String COLUMN_ID = "id";
@@ -22,6 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_USAGE_COUNT = "usage_count";
     private static final String COLUMN_STATUS = "item_status";
     private static final String COLUMN_PRICE = "item_price";
+    private static final String COLUMN_PRIORITY = "item_priority";
 
 
     public DatabaseHelper(Context context) {
@@ -45,7 +46,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(oldVersion < newVersion )
         {
 
-            String query = "ALTER TABLE " + TABLE_ITEMS + " ADD " + COLUMN_PRICE + " INTEGER DEFAULT 0";
+            String query = "ALTER TABLE " + TABLE_ITEMS + " ADD " + COLUMN_PRIORITY + " INTEGER DEFAULT 0";
             db.execSQL(query);
         }
         else {
@@ -63,6 +64,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_POS, pos);
         values.put(COLUMN_STATUS, 0);
+        values.put(COLUMN_USAGE_COUNT, 0);  // Initial usage count is 0
+        db.insert(TABLE_ITEMS, null, values);
+        db.close();
+    }
+    // Add a new item
+    public void add_item_price(String name, int pos, int price) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, name);
+        values.put(COLUMN_POS, pos);
+        values.put(COLUMN_STATUS, 0);
+        values.put(COLUMN_PRICE, price);
         values.put(COLUMN_USAGE_COUNT, 0);  // Initial usage count is 0
         db.insert(TABLE_ITEMS, null, values);
         db.close();
@@ -135,13 +148,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query, new String[]{name});
         db.close();
     }
+    public void update_item_name(String new_name, String old_name)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_NAME + " = \"" + new_name + "\" WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{old_name});
+        db.close();
+
+    }
 
     // Get items sorted by most used (descending order of usage_count)
     public List<NameStatusPair> getItemsSortedByUsageAndStatus() {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE},
-                null, null, null, null, COLUMN_STATUS + " DESC, "+ COLUMN_POS + " DESC, "+COLUMN_USAGE_COUNT+" DESC");
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE, COLUMN_PRIORITY},
+                null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_POS + " DESC, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
             do {
@@ -150,7 +171,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String item_status = cursor.getString(2);
                 String item_pos = cursor.getString(3);
                 String item_price = cursor.getString(4);
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price));
+                String item_prio = cursor.getString(5);
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price, item_prio));
             } while (cursor.moveToNext());
         }
 
@@ -163,8 +185,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<NameStatusPair> getItemsSortedByUsage() {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE},
-                null, null, null, null, COLUMN_STATUS + " DESC, "+ COLUMN_USAGE_COUNT + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE, COLUMN_PRIORITY},
+                null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_USAGE_COUNT + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
             do {
@@ -173,7 +195,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String item_status = cursor.getString(2);
                 String item_pos = cursor.getString(3);
                 String item_price = cursor.getString(4);
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price));
+                String item_prio = cursor.getString((5));
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price, item_prio));
             } while (cursor.moveToNext());
         }
 
@@ -200,5 +223,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         String test = cursor.getString(0);
         return cursor;
+    }
+
+    public void set_priority(String name, int i)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_PRIORITY + " = \"" + i + "\" WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{name});
+        db.close();
     }
 }

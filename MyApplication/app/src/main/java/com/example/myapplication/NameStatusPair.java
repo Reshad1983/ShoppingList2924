@@ -6,15 +6,21 @@ public class NameStatusPair {
     private String usage;
     private String pos;
     private String price;
-    public NameStatusPair(String name, String status, String usage, String pos, String price)
+    private String prio;
+    public NameStatusPair(String name, String status, String usage, String pos, String price, String prio)
     {
         this.name = name;
         this.status = status;
         this.usage = usage;
         this.pos = pos;
         this.price = price;
+        this.prio = prio;
     }
 
+    public String getPrio()
+    {
+        return this.prio;
+    }
     public String getPrice()
     {
         return this.price;
@@ -52,6 +58,14 @@ public class NameStatusPair {
     public void setPrice(String price)
     {
         this.price = price;
+    }
+    public void set_name(String name)
+    {
+        this.name = name;
+    }
+    public void set_prio(String prio)
+    {
+        this.prio = prio;
     }
 }
 

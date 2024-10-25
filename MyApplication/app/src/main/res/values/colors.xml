@@ -13,8 +13,9 @@
     <color name="transparent_corner">#2A2A28</color>
     <color name="unchecked_corner">#4E2501</color>
     <color name="checked_corner">#014505</color>
-    <color name="transparent">#454544</color>
+    <color name="transparent">#545353</color>
     <color name="unchecked">#C59A8C</color>
+    <color name="prio">#D97C5D</color>
     <color name="checked">#016e07</color>
     <color name="view_color">#878E87</color>
     <color name="position_color">#2C3C90</color>
