@@ -3,6 +3,8 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.text.LineBreakConfig;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -310,6 +312,7 @@ boolean sorting = true;
     }
     public void addItemToLayout(View itemView, NameStatusPair item){
         TextView item_name = itemView.findViewById(R.id.textView);
+        TextView item_price = itemView.findViewById(R.id.price_id);
         TextView item_pos = itemView.findViewById(R.id.pos_view);
         TextView item_used = itemView.findViewById(R.id.used_view_id);
         itemView.setBackgroundResource(R.drawable.hole_view);
@@ -357,7 +360,7 @@ boolean sorting = true;
             String new_pos = ((pos + 1) > 9 ) ? "1" : (pos + 1)+ "";
             item.setPos(new_pos);
             sdb.updatePos(item.getPos(), item.getName());
-            item_pos.setText("pos: " + item.getPos());
+            item_pos.setText(item.getPos());
             return true;
         });
         item_name.setOnLongClickListener(v -> {
@@ -367,7 +370,7 @@ boolean sorting = true;
                 {
                     sdb.updatePrice( Integer.parseInt(search_item.getText().toString()), item.getName());
                     item_name.setText(item.getName());
-                    item_name.append("\n" + search_item.getText().toString() + " sek");
+                    item_price.setText(search_item.getText().toString() + " sek");
                 }
                 else
                 {
@@ -376,7 +379,7 @@ boolean sorting = true;
                     item.set_name(new_name);
                     Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
                     item_name.setText(item.getName());
-                    item_name.append("\n" + item.getPrice()+ " sek");
+                    item_price.setText(item.getPrice() + " sek");
 
                 }
             }
@@ -407,9 +410,12 @@ boolean sorting = true;
                 }
             }
         });
-        item_pos.setText("pos: " + item.getPos() );
+        item_pos.setText(item.getPos() );
         item_name.setText(item.getName());
-        item_name.append("\n" + item.getPrice() + " sek");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            item_name.setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_LOOSE);
+        }
+        item_price.setText(item.getPrice() + " sek");
 
         item_used.setText(item.getUsage()+ " ggr");
         list_view.addView(itemView);
@@ -433,6 +439,8 @@ boolean sorting = true;
     {
         TextView item_name = itemView.findViewById(R.id.textView);
         TextView item_pos = itemView.findViewById(R.id.pos_view);
+
+        TextView item_price = itemView.findViewById(R.id.price_id);//.setText(search_item.getText().toString() + " sek");
         TextView item_used = itemView.findViewById(R.id.used_view_id);
 
         String status = item.getStatus();
@@ -445,16 +453,37 @@ boolean sorting = true;
                 case "0":
                     if(h_v_view == 1)
                     {
-                        item_name.setTextColor(Color.BLACK);
+                        item_name.setTextColor(R.drawable.usage);
                         item_name.setBackgroundResource(R.drawable.unchecked);
-                        item_pos.setText("pos: " + item.getPos());
+                        item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_name.append("\n" + item.getPrice() + " sek");
+                        item_price.setText(item.getPrice() + " sek");
                         item_used.setText(item.getUsage()+ " ggr");
                         item.setStatus("1");
                         sdb.updateStatus(unchecked_status, item.getName());
                         total_to_buy += Integer.parseInt(item.getPrice());
                         sum_view.setText(total_to_buy + " sek");
+                    }
+                    else
+                    {
+                        list_view.removeAllViews();
+                        String pos = item.getPos();
+
+                        List<NameStatusPair> search_items = new ArrayList<>();
+                        List<NameStatusPair >items = sdb.getItemsSortedByUsageAndStatus();
+                        for (NameStatusPair item_pos_search : items) {
+                            if (item_pos_search.getPos().equals(pos)) {
+                                search_items.add(item_pos_search);
+                            }
+                        }
+                        sd_num_view.setText(String.format("%d",search_items.size()));
+                        sd_num_view.setBackgroundResource(R.drawable.checked);
+                        add_items_to_view(search_items);
+
+                        sc_view.fullScroll(ScrollView.FOCUS_UP);
+                        search_item.setText("");
+                        InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
                     }
                     break;
                 case "1":
@@ -466,18 +495,18 @@ boolean sorting = true;
                         int checked_status = 2;
                         sdb.updateStatus(checked_status, item.getName());
                         item.setStatus("2");
-                        item_pos.setText("pos: " + item.getPos());
+                        item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_name.append("\n" + item.getPrice() + " sek");
+                        item_price.setText(item.getPrice() + " sek");
                         item_used.setText(item.getUsage()+ " ggr");
                     }
                     else
                     {
                         item_name.setBackgroundResource(R.drawable.transparent);
                         item.setStatus("0");
-                        item_pos.setText("pos: " + item.getPos());
+                        item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_name.append("\n" + item.getPrice() + " sek");
+                        item_price.setText(item.getPrice() + " sek");
                         item_used.setText(item.getUsage()+ " ggr");
                         sdb.updateStatus(no_status, item.getName());
                         sdb.set_priority(item.getName(), 0);
@@ -493,8 +522,8 @@ boolean sorting = true;
                         sdb.updateStatus(unchecked_status, item.getName());
                         item.setStatus("1");
                         item_name.setText(item.getName());
-                        item_name.append("\n" + item.getPrice() + " sek");
-                        item_pos.setText("pos: " + item.getPos());
+                        item_price.setText(item.getPrice() + " sek");
+                        item_pos.setText(item.getPos());
                         item_used.setText(item.getUsage()+ " ggr");
                         total_to_buy += Integer.parseInt(item.getPrice());
                         sum_view.setText(total_to_buy + " sek");
@@ -505,9 +534,9 @@ boolean sorting = true;
                         item_name.setTextColor(Color.WHITE);
                         item_name.setBackgroundResource(R.drawable.transparent);
                         item_name.setText(item.getName());
-                        item_name.append("\n" + item.getPrice() + " sek");
+                        item_price.setText(item.getPrice() + " sek");
                         item.setStatus("0");
-                        item_pos.setText("pos: " + item.getPos());
+                        item_pos.setText(item.getPos());
                         item_used.setText(item.getUsage()+ " ggr");
                         sdb.updateStatus(no_status, item.getName());
                         total_to_buy -= Integer.parseInt(item.getPrice());
