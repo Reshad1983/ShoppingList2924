@@ -6,14 +6,17 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database Name and Version
     private static final String DATABASE_NAME = "items.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
     // Table and Columns
     private static final String TABLE_ITEMS = "items";
     private static final String COLUMN_ID = "id";
@@ -23,6 +26,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_STATUS = "item_status";
     private static final String COLUMN_PRICE = "item_price";
     private static final String COLUMN_PRIORITY = "item_priority";
+    private static final String COLUMN_DATE = "purchase_date";
+    private static final String COLUMN_INTERVAL = "purchase_interval" ;
 
 
     public DatabaseHelper(Context context) {
@@ -46,7 +51,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(oldVersion < newVersion )
         {
 
-            String query = "ALTER TABLE " + TABLE_ITEMS + " ADD " + COLUMN_PRIORITY + " INTEGER DEFAULT 0";
+            String query = "ALTER TABLE " + TABLE_ITEMS + " ADD " + COLUMN_INTERVAL + " INTEGER DEFAULT 7 ";
+            db.execSQL(query);
+            query = "ALTER TABLE " + TABLE_ITEMS + " ADD " + COLUMN_DATE + " TEXT ";
             db.execSQL(query);
         }
         else {
@@ -59,24 +66,30 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     // Add a new item
     public void addItem(String name, int pos) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(new Date());
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_POS, pos);
         values.put(COLUMN_STATUS, 0);
         values.put(COLUMN_USAGE_COUNT, 0);  // Initial usage count is 0
+        values.put(COLUMN_DATE, date);
         db.insert(TABLE_ITEMS, null, values);
         db.close();
     }
     // Add a new item
     public void add_item_price(String name, int pos, int price) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String date = sdf.format(new Date());
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_POS, pos);
         values.put(COLUMN_STATUS, 0);
         values.put(COLUMN_PRICE, price);
-        values.put(COLUMN_USAGE_COUNT, 0);  // Initial usage count is 0
+        values.put(COLUMN_USAGE_COUNT, 0);
+        values.put(COLUMN_DATE, date);// Initial usage count is 0
         db.insert(TABLE_ITEMS, null, values);
         db.close();
     }
@@ -85,7 +98,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void removeItem(String name) {
         String [] item_to_delete = name.split(System.lineSeparator(), -2);
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + TABLE_ITEMS + " WHERE " +COLUMN_NAME + " = ?" ;
+        String query = "DELETE FROM " + TABLE_ITEMS + " WHERE " + COLUMN_NAME + " = ?" ;
         db.execSQL(query, new String []{item_to_delete[0]} );
         db.execSQL(query);
         db.close();
@@ -141,6 +154,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query, new String[]{name});
         db.close();
     }
+    public void update_date(String date , String name)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_DATE + " = \"" + date + "\" WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{name});
+        db.close();
+    }
     public void updatePos(String pos, String name)
     {
         SQLiteDatabase db = this.getWritableDatabase();
@@ -155,37 +175,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query, new String[]{old_name});
         db.close();
 
-    }
-
-    // Get items sorted by most used (descending order of usage_count)
-    public List<NameStatusPair> getItemsSortedByUsageAndStatus() {
+    }  // Get items sorted by most used (descending order of usage_count)
+    public List<NameStatusPair> getItemsSortedByUsage() throws ParseException {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE, COLUMN_PRIORITY},
-                null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_POS + " DESC, "+COLUMN_USAGE_COUNT+" DESC");
-
-        if (cursor.moveToFirst()) {
-            do {
-                String itemName = cursor.getString(0);
-                String itemUsage = cursor.getString(1);
-                String item_status = cursor.getString(2);
-                String item_pos = cursor.getString(3);
-                String item_price = cursor.getString(4);
-                String item_prio = cursor.getString(5);
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price, item_prio));
-            } while (cursor.moveToNext());
-        }
-
-        cursor.close();
-        db.close();
-        return itemList;
-    }
-
-    // Get items sorted by most used (descending order of usage_count)
-    public List<NameStatusPair> getItemsSortedByUsage() {
-        List<NameStatusPair> itemList = new ArrayList<>();
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE, COLUMN_PRIORITY},
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE},
                 null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_USAGE_COUNT + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
@@ -196,7 +190,63 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String item_pos = cursor.getString(3);
                 String item_price = cursor.getString(4);
                 String item_prio = cursor.getString((5));
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price, item_prio));
+                String interval = cursor.getString((6));
+                String date_string = cursor.getString((7));
+                if(date_string != null && date_string.contains("d"))
+                {
+                    date_string = null;
+                }
+                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
+                Date date;
+                if(date_string != null && (date_string.length() > 4))
+                {
+                    date = sfd.parse(date_string);
+                }
+                else
+                {
+
+                    date = null;
+                }
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price, item_prio, interval, date));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return itemList;
+    }
+    public List<NameStatusPair> getItemsSortedByPosition() throws ParseException {
+        List<NameStatusPair> itemList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_PRICE, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE},
+                null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_POS + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
+
+        if (cursor.moveToFirst()) {
+            do {
+                String itemName = cursor.getString(0);
+                String itemUsage = cursor.getString(1);
+                String item_status = cursor.getString(2);
+                String item_pos = cursor.getString(3);
+                String item_price = cursor.getString(4);
+                String item_prio = cursor.getString((5));
+                String interval = cursor.getString((6));
+                String date_string = cursor.getString((7));
+                if(date_string != null && date_string.contains("d"))
+                {
+                    date_string = null;
+                }
+                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
+                Date date;
+                if(date_string != null && (date_string.length() > 4))
+                {
+                    date = sfd.parse(date_string);
+                }
+                else
+                {
+
+                    date = null;
+                }
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_price, item_prio, interval, date));
             } while (cursor.moveToNext());
         }
 
@@ -230,6 +280,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_PRIORITY + " = \"" + i + "\" WHERE " + COLUMN_NAME + " = ?";
         db.execSQL(query, new String[]{name});
+        db.close();
+    }
+
+    public void update_interval(int i, String name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_INTERVAL + " = " + i + " WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{name});
+        db.close();
+    }
+
+    public void update_all_date(String date) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_DATE + " = \"" + date + "\"";
+        db.execSQL(query);
         db.close();
     }
 }

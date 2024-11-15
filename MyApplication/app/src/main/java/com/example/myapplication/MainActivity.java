@@ -1,5 +1,6 @@
 package com.example.myapplication;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -13,17 +14,18 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     public static final String FIRST_TIME = "first_time";
-    public static final String FIRST_ENTRY = "first_entry";
-
+    public static final String FIRST_ENTRY = "first_entry";;
     NamePosPair[] items = {
             new NamePosPair("Avfallspåse", 4), new NamePosPair("Kyckling", 5) , new NamePosPair("Honung", 4), new NamePosPair("Blöja", 4),
             new NamePosPair("Torrschampo", 7), new NamePosPair("Toalettpapper", 4), new NamePosPair("Tandkräm", 7), new NamePosPair("Smoothie", 6),
@@ -76,12 +78,22 @@ public class MainActivity extends AppCompatActivity {
     int found = 0;
     boolean need_to_be_incremented = false;
     TextView sd_num_view;
-    TextView sum_view;
+    EditText pos_view;
+    EditText interval_view;
     LinearLayout list_view;
+    TextView one_btn;
+    TextView two_btn;
+    TextView three_btn;
+    TextView four_btn;
+    TextView five_btn;
+    TextView six_btn;
+    TextView seven_btn;
+    TextView eight_btn;
+    TextView nine_btn;
     LinearLayout search_layout;
+    LinearLayout fast_search_layout;
     public DatabaseHelper sdb;
-    int total_to_buy = 0;
-boolean sorting = true;
+    boolean sorting = true;
     EditText search_item;
     ScrollView sc_view;
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,73 +104,95 @@ boolean sorting = true;
         sdb = new DatabaseHelper(MainActivity.this);
         SharedPreferences myPre = getSharedPreferences(FIRST_TIME, MODE_PRIVATE);
         search_layout = findViewById(R.id.searsh_id);
+        fast_search_layout = findViewById(R.id.btn_search_id);
         search_item = search_layout.findViewById(R.id.search_edt);
         String first_time_to_insert = myPre.getString(FIRST_ENTRY, "first_time_to_insert_items");
         sc_view = findViewById(R.id.scroll_view_id);
         TextView search_btn = search_layout.findViewById(R.id.search_btn);
-        sd_num_view = search_layout.findViewById(R.id.sdb_num_id);
-        sum_view = search_layout.findViewById(R.id.sum_id);
-        if(first_time_to_insert.equals("first_time_to_insert_items"))
-        {
-            for(NamePosPair item : items){
+        sd_num_view = fast_search_layout.findViewById(R.id.sdb_num_id);
+        pos_view = search_layout.findViewById(R.id.item_pos_id);
+        interval_view = search_layout.findViewById(R.id.item_interval_id);
+        one_btn = fast_search_layout.findViewById(R.id.one_id);
+        two_btn = fast_search_layout.findViewById(R.id.two_id);
+        three_btn = fast_search_layout.findViewById(R.id.three_id);
+        four_btn = fast_search_layout.findViewById(R.id.four_id);
+        five_btn = fast_search_layout.findViewById(R.id.five_id);
+        six_btn = fast_search_layout.findViewById(R.id.six_id);
+        seven_btn = fast_search_layout.findViewById(R.id.seven_id);
+        eight_btn = fast_search_layout.findViewById(R.id.eight_id);
+        nine_btn = fast_search_layout.findViewById(R.id.nine_id);
+        one_btn.setOnClickListener(this);
+        two_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.two_id);
+        three_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.three_id);
+        four_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.four_id);
+        five_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.five_id);
+        six_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.six_id);
+        seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
+        eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
+        nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
+        if (first_time_to_insert.equals("first_time_to_insert_items")) {
+            for (NamePosPair item : items) {
                 sdb.addItem(item.getName(), item.getPos());
             }
+
             SharedPreferences.Editor editor = myPre.edit();
             editor.putString(FIRST_ENTRY, "not_first_time");
             editor.apply();
         }
         search_btn.setOnLongClickListener(v -> {
 
+            reset_btn_color();
             String search_text = search_item.getText().toString();
-            String []search_name_pos = search_text.split("\\s+");
+            String[] search_name_pos = search_text.split("\\s+");
             list_view.removeAllViews();
-            if(search_text.isEmpty())
-            {
+            if (search_text.isEmpty()) {
                 sdb.reset_status();
                 Toast.makeText(MainActivity.this, "Status reset!", Toast.LENGTH_LONG).show();
-            }
-            else if(is_a_number(search_text)) {
-                Toast.makeText(this, "Press te view", Toast.LENGTH_LONG).show();
+            } else if (is_a_number(search_text))
+            {
+                Toast.makeText(this, "Press the view", Toast.LENGTH_LONG).show();
                 search_item.setText("");
-            }
-            else
+            } else
             {
                 int pos = 0;
-                int price = 0 ;
-                if(search_name_pos.length == 3)
-                {
-                    try
-                    {
+                int price = 0;
+                if ((search_name_pos.length == 3) && (is_a_number(search_name_pos[1]))) {
+                    try {
                         price = Integer.parseInt(search_name_pos[2]);
                         pos = Integer.parseInt(search_name_pos[1]);
-                    }
-                    catch (Resources.NotFoundException e) {
+                    } catch (Resources.NotFoundException e) {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
                     if (price > 0) {
                         sdb.add_item_price(search_name_pos[0], pos, price);
                         Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
                     }
-                }
-                else if(search_name_pos.length == 4)
-                {
-                    try
-                    {
+                } else if ((search_name_pos.length == 3) && !(is_a_number(search_name_pos[1]) && is_a_number(search_name_pos[2]))) {
+                    try {
+
+                        pos = Integer.parseInt(search_name_pos[2]);
+                    } catch (Resources.NotFoundException e) {
+                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
+                    }
+
+                    sdb.add_item_price(search_name_pos[0] + " " + search_name_pos[1], pos, 0);
+                    Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
+
+
+                } else if (search_name_pos.length == 4) {
+                    try {
                         price = Integer.parseInt(search_name_pos[3]);
                         pos = Integer.parseInt(search_name_pos[2]);
-                    }
-                    catch (Resources.NotFoundException e) {
+                    } catch (Resources.NotFoundException e) {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
                     if (price > 0) {
-                        sdb.add_item_price(search_name_pos[0]+" "+search_name_pos[1], pos, price);
+                        sdb.add_item_price(search_name_pos[0] + " " + search_name_pos[1], pos, price);
                         Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
                     }
 
-                }
-                else if(search_name_pos.length == 1) {
-                    if (is_a_number(search_name_pos[0]))
-                    {
+                } else if (search_name_pos.length == 1) {
+                    if (is_a_number(search_name_pos[0])) {
                         try {
                             price = Integer.parseInt(search_name_pos[0]);
                         } catch (Resources.NotFoundException e) {
@@ -167,14 +201,10 @@ boolean sorting = true;
                         sdb.updatePrice(price, search_name_pos[0]);
                         Toast.makeText(this, "Item updated!!", Toast.LENGTH_LONG).show();
                     }
-                }
-                else if(search_name_pos.length == 2)
-                {
-                    try
-                    {
+                } else if (search_name_pos.length == 2) {
+                    try {
                         pos = Integer.parseInt(search_name_pos[1]);
-                    }
-                    catch (Resources.NotFoundException e) {
+                    } catch (Resources.NotFoundException e) {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
 
@@ -184,125 +214,149 @@ boolean sorting = true;
 
                 search_item.setText("");
             }
-            List<NameStatusPair> items = sdb.getItemsSortedByUsageAndStatus();
+            List<NameStatusPair> items = null;
+            try {
+                items = sdb.getItemsSortedByUsage();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
 
             sd_num_view.setText(String.format("%d", items.size()));
             add_items_to_view(items);
             return true;
         });
         search_btn.setOnClickListener(v -> {
-
+            reset_btn_color();
             EditText search_item = search_layout.findViewById(R.id.search_edt);
             String search_text = search_item.getText().toString();
             List<NameStatusPair> search_items = new ArrayList<>();
-            List<NameStatusPair> items = sdb.getItemsSortedByUsageAndStatus();
-            boolean reset_sum = true;
+            List<NameStatusPair> items = null;
+            try {
+                items = sdb.getItemsSortedByUsage();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
             list_view.removeAllViews();
-            if(search_text.isEmpty())
-                {
+            if (search_text.isEmpty()) {
 
-                    for(NameStatusPair item : items)
-                    {
-                        if(item.getStatus().equals("2") )
-                        {
-                            sdb.updateStatus(0, item.getName());
-                            sdb.set_priority(item.getName(), 0);
-                            item.set_prio("0");
-                        }
-                        else if(item.getStatus().equals("1"))
-                        {
-                            reset_sum = false;
-                            total_to_buy -= Integer.parseInt(item.getPrice());
-                        }
+                for (NameStatusPair item : items) {
+                    if (item.getStatus().equals("2")) {
+                        sdb.updateStatus(0, item.getName());
+                        sdb.set_priority(item.getName(), 0);
+                        item.set_prio("0");
+                    } else if (item.getStatus().equals("1")) {
                     }
-                    search_layout.setBackgroundResource(R.drawable.hole_view);
-                    search_item.setBackgroundResource(R.drawable.hole_view);
-                    sc_view.fullScroll(ScrollView.FOCUS_UP);
-                    items = sdb.getItemsSortedByUsageAndStatus();
-                    sd_num_view.setBackgroundResource(R.drawable.hole_view);
-                    sd_num_view.setText(String.format("%d",items.size()));
-                    if(reset_sum)
-                    {
-                        total_to_buy = 0;
-                    }
-                    add_items_to_view(items);
-                    search_item.setHint("SAR");
-                    sum_view.setText(total_to_buy + " sek");
-                    found = 1;
                 }
-                else if(search_text.equals("0"))
-                {
-                    sdb.reset_usage();
-                    search_item.setText("");
-                    items = sdb.getItemsSortedByUsageAndStatus();
-                    add_items_to_view(items);
-                    Toast.makeText(MainActivity.this, "Usage reset!", Toast.LENGTH_LONG).show();
-                    found = 1;
+                search_layout.setBackgroundResource(R.drawable.hole_view);
+                search_item.setBackgroundResource(R.drawable.hole_view);
+                sc_view.fullScroll(ScrollView.FOCUS_UP);
+                try {
+                    items = sdb.getItemsSortedByUsage();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
                 }
-                else if ((search_text.trim().length() == 1) && (Integer.parseInt(search_text) < 10) && (Integer.parseInt(search_text) > 0) )
-                {
-                    items = sdb.getItemsSortedByUsageAndStatus();
-                    for (NameStatusPair item : items) {
-                        if (item.getPos().equals(search_text)) {
-                            found = 1;
-                            search_items.add(item);
-                        }
-                    }
-                    sd_num_view.setText(String.format("%d",search_items.size()));
-                    sd_num_view.setBackgroundResource(R.drawable.checked);
-                    add_items_to_view(search_items);
+                sd_num_view.setBackgroundResource(R.drawable.hole_view);
+                sd_num_view.setText(String.format("%d", items.size()));
 
-                    sc_view.fullScroll(ScrollView.FOCUS_UP);
-                    search_item.setText("");
-                    InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
+                add_items_to_view(items);
+                search_item.setHint("SAR");
+                found = 1;
+            } else if (search_text.equals("r")) {
+                sdb.reset_status();
+                search_item.setText("");
+                try {
+                    items = sdb.getItemsSortedByUsage();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
                 }
-               else
-               {
-                    items = sdb.getItemsSortedByUsageAndStatus();
-                    for (NameStatusPair item : items) {
-                        if (item.getName().trim().toLowerCase().contains(search_text.trim().toLowerCase())) {
-                            search_item.setHint("Found!");
-                            found = 1;
-                            search_items.add(item);
-                        }
+                add_items_to_view(items);
+                Toast.makeText(MainActivity.this, "Usage reset!", Toast.LENGTH_LONG).show();
+                found = 1;
+            } else if ((search_text.trim().length() == 1) && (Integer.parseInt(search_text) < 10) && (Integer.parseInt(search_text) > 0)) {
+                try {
+                    items = sdb.getItemsSortedByUsage();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                for (NameStatusPair item : items) {
+                    if (item.getPos().equals(search_text)) {
+                        found = 1;
+                        search_items.add(item);
+                    }
+                }
+                sd_num_view.setText(String.format("%d", search_items.size()));
+                sd_num_view.setBackgroundResource(R.drawable.checked);
+                add_items_to_view(search_items);
+
+                sc_view.fullScroll(ScrollView.FOCUS_UP);
+                search_item.setText("");
+                InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
+            } else {
+                try {
+                    items = sdb.getItemsSortedByUsage();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                for (NameStatusPair item : items) {
+                    if (item.getName().trim().toLowerCase().contains(search_text.trim().toLowerCase())) {
+                        search_item.setHint("Found!");
+                        found = 1;
+                        search_items.add(item);
+                    }
                 }
                 search_item.setText("");
                 InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
                 search_layout.setBackgroundResource(R.drawable.checked);
-                sd_num_view.setText(String.format("%d",search_items.size()));
+                sd_num_view.setText(String.format("%d", search_items.size()));
                 add_items_to_view(search_items);
             }
-            if(found == 0)
-            {
+            if (found == 0) {
                 search_item.setText("");
                 search_item.setHint("Not found!");
             }
         });
-        List<NameStatusPair> items = sdb.getItemsSortedByUsage();
-        sd_num_view.setText(String.format("%d",items.size()));
+        List<NameStatusPair> items = null;
+        try {
+            items = sdb.getItemsSortedByUsage();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        sd_num_view.setText(String.format("%d", items.size()));
         sd_num_view.setBackgroundResource(R.drawable.usage);
         sd_num_view.setOnClickListener(v -> {
+            reset_btn_color();
             list_view.removeAllViews();
-            if(sorting)
-            {
-                List<NameStatusPair> items1 = sdb.getItemsSortedByUsage();
+            if (sorting) {
+                List<NameStatusPair> items1 = null;
+                try
+                {
+                    items1 = sdb.getItemsSortedByPosition();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
+                v.setBackgroundResource(R.drawable.position);
+                add_items_to_view(items1);
+                sorting = !sorting;
+            } else {
+
+                List<NameStatusPair> items1 = null;
+                try {
+                    items1 = sdb.getItemsSortedByUsage();
+                } catch (ParseException e) {
+                    throw new RuntimeException(e);
+                }
                 v.setBackgroundResource(R.drawable.usage);
                 add_items_to_view(items1);
                 sorting = !sorting;
             }
-            else
-            {
-
-                List<NameStatusPair> items1 = sdb.getItemsSortedByUsageAndStatus();
-                v.setBackgroundResource(R.drawable.position);
-                add_items_to_view(items1);
-                sorting = !sorting;
-            }
         });
-       add_items_to_view(items);
+        add_items_to_view(items);
+        startForegroundService(new Intent(this, CheckDataBase.class));
     }
+    //----------------------------------------------------------------------------------------------------------
+
     //----------------------------------------------------------------------------------------------------------
     private void add_items_to_view(List <NameStatusPair> item_to_show) {
         for(NameStatusPair item : item_to_show){
@@ -312,7 +366,7 @@ boolean sorting = true;
     }
     public void addItemToLayout(View itemView, NameStatusPair item){
         TextView item_name = itemView.findViewById(R.id.textView);
-        TextView item_price = itemView.findViewById(R.id.price_id);
+        TextView item_interval = itemView.findViewById(R.id.interval_id);
         TextView item_pos = itemView.findViewById(R.id.pos_view);
         TextView item_used = itemView.findViewById(R.id.used_view_id);
         itemView.setBackgroundResource(R.drawable.hole_view);
@@ -337,8 +391,6 @@ boolean sorting = true;
                     item_name.setBackgroundResource(R.drawable.unchecked);
 
                 }
-                total_to_buy += Integer.parseInt(item.getPrice());
-                sum_view.setText(total_to_buy + " sek");
 
                 break;
         }
@@ -363,25 +415,30 @@ boolean sorting = true;
             item_pos.setText(item.getPos());
             return true;
         });
-        item_name.setOnLongClickListener(v -> {
+        item_interval.setOnLongClickListener(v -> {
             if(!search_item.getText().toString().isEmpty())
             {
                 if(is_a_number(search_item.getText().toString()))
                 {
-                    sdb.updatePrice( Integer.parseInt(search_item.getText().toString()), item.getName());
-                    item_name.setText(item.getName());
-                    item_price.setText(search_item.getText().toString() + " sek");
+                    sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());
+                    item.set_interval(search_item.getText().toString());
+                    item_interval.setText(search_item.getText().toString());
+                    Toast.makeText(this, "Interval updated", Toast.LENGTH_LONG).show();
+                    search_item.setText("");
                 }
-                else
-                {
-                    String new_name = search_item.getText().toString();
-                    sdb.update_item_name(new_name , item.getName());
-                    item.set_name(new_name);
-                    Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
-                    item_name.setText(item.getName());
-                    item_price.setText(item.getPrice() + " sek");
+            }
+            return false;
+        });
 
-                }
+        item_name.setOnLongClickListener(v -> {
+            if(!search_item.getText().toString().isEmpty())
+            {
+                String new_name = search_item.getText().toString();
+                sdb.update_item_name(new_name , item.getName());
+                item.set_name(new_name);
+                Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
+                item_name.setText(item.getName());
+                item_interval.setText(item.get_interval());
             }
             else
             {
@@ -415,7 +472,8 @@ boolean sorting = true;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             item_name.setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_LOOSE);
         }
-        item_price.setText(item.getPrice() + " sek");
+        String item_interval_num = item.get_interval();
+        item_interval.setText(item_interval_num);
 
         item_used.setText(item.getUsage()+ " ggr");
         list_view.addView(itemView);
@@ -440,7 +498,7 @@ boolean sorting = true;
         TextView item_name = itemView.findViewById(R.id.textView);
         TextView item_pos = itemView.findViewById(R.id.pos_view);
 
-        TextView item_price = itemView.findViewById(R.id.price_id);//.setText(search_item.getText().toString() + " sek");
+        TextView item_price = itemView.findViewById(R.id.interval_id);//.setText(search_item.getText().toString() + " sek");
         TextView item_used = itemView.findViewById(R.id.used_view_id);
 
         String status = item.getStatus();
@@ -457,47 +515,28 @@ boolean sorting = true;
                         item_name.setBackgroundResource(R.drawable.unchecked);
                         item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_price.setText(item.getPrice() + " sek");
+                        item_price.setText(item.get_interval());
                         item_used.setText(item.getUsage()+ " ggr");
                         item.setStatus("1");
                         sdb.updateStatus(unchecked_status, item.getName());
-                        total_to_buy += Integer.parseInt(item.getPrice());
-                        sum_view.setText(total_to_buy + " sek");
-                    }
-                    else
-                    {
-                        list_view.removeAllViews();
-                        String pos = item.getPos();
 
-                        List<NameStatusPair> search_items = new ArrayList<>();
-                        List<NameStatusPair >items = sdb.getItemsSortedByUsageAndStatus();
-                        for (NameStatusPair item_pos_search : items) {
-                            if (item_pos_search.getPos().equals(pos)) {
-                                search_items.add(item_pos_search);
-                            }
-                        }
-                        sd_num_view.setText(String.format("%d",search_items.size()));
-                        sd_num_view.setBackgroundResource(R.drawable.checked);
-                        add_items_to_view(search_items);
-
-                        sc_view.fullScroll(ScrollView.FOCUS_UP);
-                        search_item.setText("");
-                        InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
                     }
                     break;
                 case "1":
                     item_name.setTextColor(Color.WHITE);
                     if(h_v_view == 1)
                     {
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        String date = sdf.format(new Date());
                         item_name.setBackgroundResource(R.drawable.checked);
                         sdb.incrementUsageCount(item.getName());
                         int checked_status = 2;
                         sdb.updateStatus(checked_status, item.getName());
+                        sdb.update_date(date, item.getName());
                         item.setStatus("2");
                         item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_price.setText(item.getPrice() + " sek");
+                        item_price.setText(item.get_interval());
                         item_used.setText(item.getUsage()+ " ggr");
                     }
                     else
@@ -506,13 +545,11 @@ boolean sorting = true;
                         item.setStatus("0");
                         item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_price.setText(item.getPrice() + " sek");
+                        item_price.setText(item.get_interval());
                         item_used.setText(item.getUsage()+ " ggr");
                         sdb.updateStatus(no_status, item.getName());
                         sdb.set_priority(item.getName(), 0);
                     }
-                    total_to_buy -= Integer.parseInt(item.getPrice());
-                    sum_view.setText(Math.max(total_to_buy, 0) + " sek");
                     break;
                 case "2":
                     if(h_v_view == 0)
@@ -522,11 +559,9 @@ boolean sorting = true;
                         sdb.updateStatus(unchecked_status, item.getName());
                         item.setStatus("1");
                         item_name.setText(item.getName());
-                        item_price.setText(item.getPrice() + " sek");
+                        item_price.setText(item.get_interval());
                         item_pos.setText(item.getPos());
                         item_used.setText(item.getUsage()+ " ggr");
-                        total_to_buy += Integer.parseInt(item.getPrice());
-                        sum_view.setText(total_to_buy + " sek");
                     }
                     else
                     {
@@ -534,13 +569,11 @@ boolean sorting = true;
                         item_name.setTextColor(Color.WHITE);
                         item_name.setBackgroundResource(R.drawable.transparent);
                         item_name.setText(item.getName());
-                        item_price.setText(item.getPrice() + " sek");
+                        item_price.setText(item.get_interval());
                         item.setStatus("0");
                         item_pos.setText(item.getPos());
                         item_used.setText(item.getUsage()+ " ggr");
                         sdb.updateStatus(no_status, item.getName());
-                        total_to_buy -= Integer.parseInt(item.getPrice());
-                        sum_view.setText(Math.max(total_to_buy, 0) + " sek");
                     }
                     break;
 
@@ -553,6 +586,103 @@ boolean sorting = true;
     protected void onUserLeaveHint() {
         this.finish();
         super.onUserLeaveHint();
+    }
+
+    @Override
+    public void onClick(View v) {
+        reset_btn_color();
+        String pos = getString(v);
+        list_view.removeAllViews();
+
+        List<NameStatusPair> search_items = new ArrayList<>();
+        List<NameStatusPair >items = null;
+        try {
+            items = sdb.getItemsSortedByUsage();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        for (NameStatusPair item_pos_search : items) {
+            if (item_pos_search.getPos().equals(pos)) {
+                search_items.add(item_pos_search);
+            }
+        }
+        sd_num_view.setText(String.format("%d",search_items.size()));
+        sd_num_view.setBackgroundResource(R.drawable.checked);
+        add_items_to_view(search_items);
+
+        sc_view.fullScroll(ScrollView.FOCUS_UP);
+        search_item.setText("");
+        InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
+    }
+
+    private static @NonNull String getString(View v) {
+        int i = v.getId();
+        String pos = "";
+        if(i == R.id.one_id)
+        {
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "1";
+        }
+        else if(i == R.id.two_id)
+        {
+
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "2";
+        }
+        else if(i == R.id.three_id)
+        {
+
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "3";
+        }
+        else if(i == R.id.four_id)
+        {
+
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "4";
+        }
+        else if(i == R.id.five_id)
+        {
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "5";
+        }
+        else if(i == R.id.six_id)
+        {
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "6";
+        }
+        else if(i == R.id.seven_id)
+        {
+
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "7";
+        }
+        else if(i == R.id.eight_id)
+        {
+
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "8";
+        }
+        else if(i == R.id.nine_id)
+        {
+
+            v.setBackgroundResource(R.drawable.checked);
+            pos = "9";
+        }
+        return pos;
+    }
+    private void reset_btn_color()
+    {
+        one_btn.setBackgroundResource(R.drawable.transparent);
+        two_btn.setBackgroundResource(R.drawable.transparent);
+        three_btn.setBackgroundResource(R.drawable.transparent);
+        four_btn.setBackgroundResource(R.drawable.transparent);
+        five_btn.setBackgroundResource(R.drawable.transparent);
+        six_btn.setBackgroundResource(R.drawable.transparent);
+        seven_btn.setBackgroundResource(R.drawable.transparent);
+        eight_btn.setBackgroundResource(R.drawable.transparent);
+        nine_btn.setBackgroundResource(R.drawable.transparent);
     }
 
 }

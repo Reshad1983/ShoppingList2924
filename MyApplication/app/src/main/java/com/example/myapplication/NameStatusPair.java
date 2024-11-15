@@ -1,5 +1,8 @@
 package com.example.myapplication;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 public class NameStatusPair {
     private String name;
     private String status;
@@ -7,6 +10,9 @@ public class NameStatusPair {
     private String pos;
     private String price;
     private String prio;
+    private String interval;
+    private Date date;
+
     public NameStatusPair(String name, String status, String usage, String pos, String price, String prio)
     {
         this.name = name;
@@ -15,6 +21,18 @@ public class NameStatusPair {
         this.pos = pos;
         this.price = price;
         this.prio = prio;
+    }
+
+    public NameStatusPair(String name, String status, String usage, String pos, String price, String prio, String method_interval, Date date)
+    {
+        this.name = name;
+        this.status = status;
+        this.usage = usage;
+        this.pos = pos;
+        this.price = price;
+        this.prio = prio;
+        this.interval = method_interval;
+        this.date = date;
     }
 
     public String getPrio()
@@ -29,12 +47,9 @@ public class NameStatusPair {
     {
         return this.name;
     }
-
-    public String getStatus()
-    {
-        return this.status;
-
-    }
+    public Date get_date(){return this.date;}
+    public String get_interval(){return this.interval;}
+    public String getStatus(){return this.status; }
     public String getUsage()
     {
         return this.usage;
@@ -63,9 +78,7 @@ public class NameStatusPair {
     {
         this.name = name;
     }
-    public void set_prio(String prio)
-    {
-        this.prio = prio;
-    }
+    public void set_interval(String interval){this.interval = interval;}
+    public void set_prio(String prio){this.prio = prio;}
 }
 

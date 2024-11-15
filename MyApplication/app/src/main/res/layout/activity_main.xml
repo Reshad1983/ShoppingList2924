@@ -18,14 +18,7 @@
         android:layout_margin="5dp"
         android:background="@drawable/hole_view"
         android:orientation="horizontal">
-        <TextView
-            android:id="@+id/sdb_num_id"
-            android:layout_width="40dp"
-            android:textSize="10sp"
-            android:gravity="center"
-            android:layout_margin="2dp"
-            android:background="@drawable/hole_view"
-            android:layout_height="match_parent"/>
+
         <EditText
             android:id="@+id/search_edt"
             android:layout_width="180dp"
@@ -38,9 +31,17 @@
             android:textColor="@color/white"
             android:hint="@string/search"/>
 
-        <TextView
-            android:id="@+id/sum_id"
-            android:layout_width="70dp"
+        <EditText
+            android:id="@+id/item_pos_id"
+            android:layout_width="50dp"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_margin="2dp"
+            android:background="@drawable/hole_view"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:id="@+id/item_interval_id"
+            android:layout_width="50dp"
             android:textSize="10sp"
             android:gravity="center"
             android:layout_margin="2dp"
@@ -55,6 +56,115 @@
             android:layout_height="match_parent"
             android:textColor="@color/white"
             android:text="@string/search" />
+
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/btn_search_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:layout_margin="5dp"
+        android:background="@drawable/hole_view"
+        android:orientation="horizontal">
+        <TextView
+            android:id="@+id/sdb_num_id"
+            android:layout_width="40dp"
+            android:textSize="10sp"
+            android:gravity="center"
+            android:layout_margin="2dp"
+            android:textColor="@color/white"
+            android:background="@drawable/hole_view"
+            android:layout_height="match_parent"/>
+        <TextView
+            android:id="@+id/one_id"
+            android:layout_marginStart="7dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:background="@drawable/transparent"
+            android:textColor="@color/white"
+            android:text="1"
+            />
+        <TextView
+            android:id="@+id/two_id"
+            android:layout_marginStart="7dp"
+            android:textColor="@color/white"
+            android:background="@drawable/transparent"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="2"
+            />
+        <TextView
+            android:id="@+id/three_id"
+            android:background="@drawable/transparent"
+            android:textColor="@color/white"
+            android:layout_marginStart="7dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="3"
+            />
+        <TextView
+            android:id="@+id/four_id"
+            android:layout_marginStart="7dp"
+            android:background="@drawable/transparent"
+            android:textColor="@color/white"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="4"
+            />
+        <TextView
+            android:id="@+id/five_id"
+            android:layout_marginStart="7dp"
+            android:textColor="@color/white"
+            android:background="@drawable/transparent"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="5"
+            />
+        <TextView
+            android:id="@+id/six_id"
+            android:layout_marginStart="7dp"
+            android:textColor="@color/white"
+            android:background="@drawable/transparent"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="6"
+            />
+        <TextView
+            android:id="@+id/seven_id"
+            android:layout_marginStart="7dp"
+            android:textColor="@color/white"
+            android:background="@drawable/transparent"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="7"
+            />
+        <TextView
+            android:id="@+id/eight_id"
+            android:layout_marginStart="7dp"
+            android:textColor="@color/white"
+            android:background="@drawable/transparent"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="8"
+            />
+        <TextView
+            android:id="@+id/nine_id"
+            android:background="@drawable/transparent"
+            android:textColor="@color/white"
+            android:layout_marginStart="7dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:gravity="center"
+            android:text="9"
+            />
 
     </LinearLayout>
     <ScrollView
