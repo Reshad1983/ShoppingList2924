@@ -142,11 +142,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         minus_btn.setOnClickListener(v -> {
-            num_of_days = (num_of_days > 7)?(num_of_days - 7):7;
+            num_of_days = (num_of_days > 7)?(num_of_days - 7):90;
             search_item.setText(num_of_days + "");
         });
         plus_btn.setOnClickListener(v -> {
-            num_of_days = (num_of_days < 90)?(num_of_days + 7):90;
+            num_of_days = (num_of_days < 90)?(num_of_days + 7):7;
             search_item.setText(num_of_days + "");
 
         });
@@ -425,20 +425,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             item_pos.setText(item.getPos());
             return true;
         });
-        item_interval.setOnLongClickListener(v -> {
-            if(!search_item.getText().toString().isEmpty())
-            {
-                if(is_a_number(search_item.getText().toString()))
+        item_interval.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(!search_item.getText().toString().isEmpty())
                 {
-                    sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());
-                    item.set_interval(search_item.getText().toString());
-                    item_interval.setText(search_item.getText().toString());
-                    num_of_days = 7;
-                    Toast.makeText(this, "Interval updated", Toast.LENGTH_LONG).show();
-                    search_item.setText("");
+                    if(is_a_number(search_item.getText().toString()))
+                    {
+                        sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());
+                        item.set_interval(search_item.getText().toString());
+                        item_interval.setText(search_item.getText().toString());
+                        num_of_days = 7;
+                        Toast.makeText(MainActivity.this, "Interval updated", Toast.LENGTH_LONG).show();
+                        search_item.setText("");
+                    }
                 }
             }
-            return false;
         });
 
         item_name.setOnLongClickListener(v -> {
