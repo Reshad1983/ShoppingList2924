@@ -43,7 +43,7 @@
             tools:ignore="MissingConstraints"/>
         <TextView
             android:id="@+id/interval_id"
-            android:layout_width="45dp"
+            android:layout_width="40dp"
             android:layout_height="35dp"
             android:layout_margin="3dp"
             android:background="@drawable/rounded_corner"
@@ -58,7 +58,7 @@
        </LinearLayout>
     <TextView
         android:id="@+id/used_view_id"
-        android:layout_width="55dp"
+        android:layout_width="65dp"
         android:layout_height="35dp"
         android:layout_margin="3dp"
         android:layout_gravity="center"
