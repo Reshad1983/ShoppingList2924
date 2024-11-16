@@ -135,12 +135,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for (NamePosPair item : items) {
                 sdb.addItem(item.getName(), item.getPos());
             }
-
             SharedPreferences.Editor editor = myPre.edit();
             editor.putString(FIRST_ENTRY, "not_first_time");
             editor.apply();
         }
-
         minus_btn.setOnClickListener(v -> {
             num_of_days = (num_of_days > 7)?(num_of_days - 7):90;
             search_item.setText(num_of_days + "");
