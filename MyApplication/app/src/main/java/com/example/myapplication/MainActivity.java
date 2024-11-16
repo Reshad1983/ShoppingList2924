@@ -78,8 +78,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int found = 0;
     boolean need_to_be_incremented = false;
     TextView sd_num_view;
-    EditText pos_view;
-    EditText interval_view;
+    TextView minus_btn;
+    TextView plus_btn;
     LinearLayout list_view;
     TextView one_btn;
     TextView two_btn;
@@ -96,6 +96,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     boolean sorting = true;
     EditText search_item;
     ScrollView sc_view;
+    int num_of_days = 7;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
@@ -110,8 +111,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sc_view = findViewById(R.id.scroll_view_id);
         TextView search_btn = search_layout.findViewById(R.id.search_btn);
         sd_num_view = fast_search_layout.findViewById(R.id.sdb_num_id);
-        pos_view = search_layout.findViewById(R.id.item_pos_id);
-        interval_view = search_layout.findViewById(R.id.item_interval_id);
+        minus_btn = search_layout.findViewById(R.id.minus_btn_id);
+        plus_btn = search_layout.findViewById(R.id.plus_btn_id);
         one_btn = fast_search_layout.findViewById(R.id.one_id);
         two_btn = fast_search_layout.findViewById(R.id.two_id);
         three_btn = fast_search_layout.findViewById(R.id.three_id);
@@ -139,8 +140,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             editor.putString(FIRST_ENTRY, "not_first_time");
             editor.apply();
         }
-        search_btn.setOnLongClickListener(v -> {
 
+        minus_btn.setOnClickListener(v -> {
+            num_of_days = (num_of_days > 7)?(num_of_days - 7):7;
+            search_item.setText(num_of_days + "");
+        });
+        plus_btn.setOnClickListener(v -> {
+            num_of_days = (num_of_days < 90)?(num_of_days + 7):90;
+            search_item.setText(num_of_days + "");
+
+        });
+        search_btn.setOnLongClickListener(v -> {
             reset_btn_color();
             String search_text = search_item.getText().toString();
             String[] search_name_pos = search_text.split("\\s+");
@@ -423,6 +433,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());
                     item.set_interval(search_item.getText().toString());
                     item_interval.setText(search_item.getText().toString());
+                    num_of_days = 7;
                     Toast.makeText(this, "Interval updated", Toast.LENGTH_LONG).show();
                     search_item.setText("");
                 }
