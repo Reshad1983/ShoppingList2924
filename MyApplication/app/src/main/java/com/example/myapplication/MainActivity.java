@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
         if (first_time_to_insert.equals("first_time_to_insert_items")) {
             for (NamePosPair item : items) {
-                sdb.addItem(item.getName(), item.getPos());
+                sdb.add_item(item.getName(), item.getPos(), 1);
             }
             SharedPreferences.Editor editor = myPre.edit();
             editor.putString(FIRST_ENTRY, "not_first_time");
@@ -151,72 +151,89 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         search_btn.setOnLongClickListener(v -> {
             reset_btn_color();
             String search_text = search_item.getText().toString();
-            String[] search_name_pos = search_text.split("\\s+");
+            String[] search_name_pos_duration = search_text.split("\\s+");
             list_view.removeAllViews();
+            //Reset all status if nothing entered
             if (search_text.isEmpty()) {
                 sdb.reset_status();
                 Toast.makeText(MainActivity.this, "Status reset!", Toast.LENGTH_LONG).show();
-            } else if (is_a_number(search_text))
+            }// If user entered just a number then an item interval should be updated
+            else if (is_a_number(search_text))
             {
                 Toast.makeText(this, "Press the view", Toast.LENGTH_LONG).show();
                 search_item.setText("");
             } else
             {
                 int pos = 0;
-                int price = 0;
-                if ((search_name_pos.length == 3) && (is_a_number(search_name_pos[1]))) {
-                    try {
-                        price = Integer.parseInt(search_name_pos[2]);
-                        pos = Integer.parseInt(search_name_pos[1]);
-                    } catch (Resources.NotFoundException e) {
+                int duration = 0;
+                //If user entered 3 separated input in search box and two of them are numbers then it must be name, position and duration
+                if ((search_name_pos_duration.length == 3) && (is_a_number(search_name_pos_duration[1])))
+                {
+                    try
+                    {
+                        duration = Integer.parseInt(search_name_pos_duration[2]);
+                        pos = Integer.parseInt(search_name_pos_duration[1]);
+                    } catch (Resources.NotFoundException e)
+                    {
+                        Toast.makeText(this, "Enter position or duration", Toast.LENGTH_LONG).show();
+                    }
+                    sdb.add_item(search_name_pos_duration[0], pos, duration);
+                    Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
+                    //If user entered 3 separated input in search box and the second one is also a text then it must be item name and position, duration must be 1
+                } else if ((search_name_pos_duration.length == 3) && !(is_a_number(search_name_pos_duration[1]) && is_a_number(search_name_pos_duration[2])))
+                {
+                    try
+                    {
+
+                        pos = Integer.parseInt(search_name_pos_duration[2]);
+                    }
+                    catch (Resources.NotFoundException e)
+                    {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
-                    if (price > 0) {
-                        sdb.add_item_price(search_name_pos[0], pos, price);
-                        Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
-                    }
-                } else if ((search_name_pos.length == 3) && !(is_a_number(search_name_pos[1]) && is_a_number(search_name_pos[2]))) {
-                    try {
 
-                        pos = Integer.parseInt(search_name_pos[2]);
-                    } catch (Resources.NotFoundException e) {
-                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
-                    }
-
-                    sdb.add_item_price(search_name_pos[0] + " " + search_name_pos[1], pos, 0);
+                    sdb.add_item(search_name_pos_duration[0] + " " + search_name_pos_duration[1], pos, 0);
                     Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
 
 
-                } else if (search_name_pos.length == 4) {
+                    //If user entered 3 separated input in search box and two of them are numbers then it must be name, position and duration
+                } else if (search_name_pos_duration.length == 4)
+                {
                     try {
-                        price = Integer.parseInt(search_name_pos[3]);
-                        pos = Integer.parseInt(search_name_pos[2]);
+                        duration = Integer.parseInt(search_name_pos_duration[3]);
+                        pos = Integer.parseInt(search_name_pos_duration[2]);
                     } catch (Resources.NotFoundException e) {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
-                    if (price > 0) {
-                        sdb.add_item_price(search_name_pos[0] + " " + search_name_pos[1], pos, price);
-                        Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
-                    }
+                    sdb.add_item(search_name_pos_duration[0] + " " + search_name_pos_duration[1], pos, duration);
+                    Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
 
-                } else if (search_name_pos.length == 1) {
-                    if (is_a_number(search_name_pos[0])) {
-                        try {
-                            price = Integer.parseInt(search_name_pos[0]);
-                        } catch (Resources.NotFoundException e) {
+                } /*else if (search_name_pos_duration.length == 1)
+                {
+                    if (is_a_number(search_name_pos_duration[0]))
+                    {
+                        try
+                        {
+                            duration = Integer.parseInt(search_name_pos_duration[0]);
+                        }
+                        catch (Resources.NotFoundException e)
+                        {
                             Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                         }
-                        sdb.updatePrice(price, search_name_pos[0]);
+                        sdb.update_duration(duration, search_name_pos_duration[0]);
                         Toast.makeText(this, "Item updated!!", Toast.LENGTH_LONG).show();
                     }
-                } else if (search_name_pos.length == 2) {
-                    try {
-                        pos = Integer.parseInt(search_name_pos[1]);
-                    } catch (Resources.NotFoundException e) {
+                    //If user entered 2 separated input in search box and the second one is a number then it should be item name and position, duration must be 1
+                } */else if (search_name_pos_duration.length == 2)
+                {
+                    try
+                    {
+                        pos = Integer.parseInt(search_name_pos_duration[1]);
+                    } catch (Resources.NotFoundException e)
+                    {
                         Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
                     }
-
-                    sdb.addItem(search_name_pos[0], pos);
+                    sdb.add_item(search_name_pos_duration[0], pos, 1);
                     Toast.makeText(this, "New Item added!", Toast.LENGTH_LONG).show();
                 }
 
@@ -249,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 for (NameStatusPair item : items) {
                     if (item.getStatus().equals("2")) {
-                        sdb.updateStatus(0, item.getName());
+                        sdb.update_status(0, item.getName());
                         sdb.set_priority(item.getName(), 0);
                         item.set_prio("0");
                     } else if (item.getStatus().equals("1")) {
@@ -419,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int pos = Integer.parseInt(item.getPos());
             String new_pos = ((pos + 1) > 9 ) ? "1" : (pos + 1)+ "";
             item.setPos(new_pos);
-            sdb.updatePos(item.getPos(), item.getName());
+            sdb.update_position(item.getPos(), item.getName());
             item_pos.setText(item.getPos());
             return true;
         });
@@ -509,7 +526,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView item_name = itemView.findViewById(R.id.textView);
         TextView item_pos = itemView.findViewById(R.id.pos_view);
 
-        TextView item_price = itemView.findViewById(R.id.interval_id);//.setText(search_item.getText().toString() + " sek");
+        TextView item_interval = itemView.findViewById(R.id.interval_id);//.setText(search_item.getText().toString() + " sek");
         TextView item_used = itemView.findViewById(R.id.used_view_id);
 
         String status = item.getStatus();
@@ -526,10 +543,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         item_name.setBackgroundResource(R.drawable.unchecked);
                         item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_price.setText(item.get_interval());
+                        item_interval.setText(item.get_interval());
                         item_used.setText(item.getUsage()+ " ggr");
                         item.setStatus("1");
-                        sdb.updateStatus(unchecked_status, item.getName());
+                        sdb.update_status(unchecked_status, item.getName());
 
                     }
                     break;
@@ -540,15 +557,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                         String date = sdf.format(new Date());
                         item_name.setBackgroundResource(R.drawable.checked);
-                        sdb.incrementUsageCount(item.getName());
-                        int checked_status = 2;
-                        sdb.updateStatus(checked_status, item.getName());
-                        sdb.update_date(date, item.getName());
-                        item.setStatus("2");
-                        item_pos.setText(item.getPos());
-                        item_name.setText(item.getName());
-                        item_price.setText(item.get_interval());
-                        item_used.setText(item.getUsage()+ " ggr");
+                        if(item.getDuration().equals("0"))
+                        {
+                            sdb.removeItem(item.getName());
+                            Toast.makeText(MainActivity.this, "Item will be removed", Toast.LENGTH_LONG).show();
+                        }
+                        else
+                        {
+                            sdb.increment_usage_count(item.getName());
+                            int checked_status = 2;
+                            sdb.update_status(checked_status, item.getName());
+                            sdb.update_date(date, item.getName());
+                            item.setStatus("2");
+                            item_pos.setText(item.getPos());
+                            item_name.setText(item.getName());
+                            item_interval.setText(item.get_interval());
+                            item_used.setText(item.getUsage()+ " ggr");
+                        }
                     }
                     else
                     {
@@ -556,9 +581,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         item.setStatus("0");
                         item_pos.setText(item.getPos());
                         item_name.setText(item.getName());
-                        item_price.setText(item.get_interval());
+                        item_interval.setText(item.get_interval());
                         item_used.setText(item.getUsage()+ " ggr");
-                        sdb.updateStatus(no_status, item.getName());
+                        sdb.update_status(no_status, item.getName());
                         sdb.set_priority(item.getName(), 0);
                     }
                     break;
@@ -567,10 +592,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     {
                         item_name.setTextColor(Color.BLACK);
                         item_name.setBackgroundResource(R.drawable.unchecked);
-                        sdb.updateStatus(unchecked_status, item.getName());
+                        sdb.update_status(unchecked_status, item.getName());
                         item.setStatus("1");
                         item_name.setText(item.getName());
-                        item_price.setText(item.get_interval());
+                        item_interval.setText(item.get_interval());
                         item_pos.setText(item.getPos());
                         item_used.setText(item.getUsage()+ " ggr");
                     }
@@ -580,11 +605,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         item_name.setTextColor(Color.WHITE);
                         item_name.setBackgroundResource(R.drawable.transparent);
                         item_name.setText(item.getName());
-                        item_price.setText(item.get_interval());
+                        item_interval.setText(item.get_interval());
                         item.setStatus("0");
                         item_pos.setText(item.getPos());
                         item_used.setText(item.getUsage()+ " ggr");
-                        sdb.updateStatus(no_status, item.getName());
+                        sdb.update_status(no_status, item.getName());
                     }
                     break;
 

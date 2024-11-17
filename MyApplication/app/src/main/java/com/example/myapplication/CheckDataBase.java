@@ -81,8 +81,8 @@ public class CheckDataBase extends Service {
                           c.setTime(date); // Using today's date
                           c.add(Calendar.DATE, interval); // Adding 5 days
                           String buy_date_to_now = sdf.format(c.getTime());
-                          if (today_date.compareTo(buy_date_to_now) >= 0) {
-                              dbh.updateStatus(1, item.getName());
+                          if (today_date.equals(buy_date_to_now)) {
+                              dbh.update_status(1, item.getName());
                               Log.d("Handlers", "Time to buy");
 
                               message.append("\n").append(item.getName());
