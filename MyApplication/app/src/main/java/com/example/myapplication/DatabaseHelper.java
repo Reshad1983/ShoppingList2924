@@ -16,20 +16,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database Name and Version
     private static final String DATABASE_NAME = "items.db";
-    private static final int DATABASE_VERSION = 6;
+    private static final int DATABASE_VERSION = 8;
     // Table and Columns
     private static final String TABLE_ITEMS = "items";
+    private static final String TABLE_FOOD = "food_recepies";
+    private static final String TABLE_DAY_FOOD = "day_food";
+
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_NAME = "name";
     private static final String COLUMN_POS = "position";
     private static final String COLUMN_USAGE_COUNT = "usage_count";
     private static final String COLUMN_STATUS = "item_status";
-    private static final String COLUMN_PRICE = "item_price";
     private static final String COLUMN_PRIORITY = "item_priority";
     private static final String COLUMN_DATE = "purchase_date";
     private static final String COLUMN_INTERVAL = "purchase_interval" ;
     private static final String COLUMN_DURATION = "item_duration" ;
-
+    private static final String COLUMN_INGREDIENTS = "Ingrediences" ;
+    private static final String COLUMN_DAY = "day_of_week";
+    private static final String COLUMN_FOOD = "food_name";
 
 
     public DatabaseHelper(Context context) {
@@ -38,25 +42,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         // Create table
-        String CREATE_ITEMS_TABLE = "CREATE TABLE " + TABLE_ITEMS + " (" +
+
+        String CREATE_ITEMS_TABLE = "CREATE TABLE " + TABLE_DAY_FOOD + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                COLUMN_NAME + " TEXT NOT NULL, " +
-                COLUMN_POS + " INTEGER DEFAULT 0,"+
-                COLUMN_STATUS + " INTEGER DEFAULT 0,"+
-                COLUMN_USAGE_COUNT + " INTEGER DEFAULT 0)";
+                COLUMN_DAY + " TEXT NOT NULL, " +
+                COLUMN_FOOD + " TEXT)";
         db.execSQL(CREATE_ITEMS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if exists
-        if(oldVersion < newVersion )
-        {
-
-            String query = "ALTER TABLE " + TABLE_ITEMS + " RENAME COLUMN " + COLUMN_PRICE + " TO " + COLUMN_DURATION;
-            db.execSQL(query);
-            query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_DURATION + " = 1";
-            db.execSQL(query);
+        if(oldVersion < newVersion ) {
+            String CREATE_ITEMS_TABLE = "CREATE TABLE " + TABLE_DAY_FOOD + " (" +
+                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                    COLUMN_DAY + " TEXT NOT NULL, " +
+                    COLUMN_FOOD + " TEXT)";
+            db.execSQL(CREATE_ITEMS_TABLE);
         }
         else {
 
@@ -65,8 +67,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         // Create table again
+    }    // Add a new item
+    public void add_food(String name, String ingredients) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NAME, name);
+        values.put(COLUMN_INGREDIENTS, ingredients);// Initial usage count is 0
+        db.insert(TABLE_FOOD, null, values);
+        db.close();
     }
     // Add a new item
+
     public void add_item(String name, int pos, int duration) {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         String date = sdf.format(new Date());
@@ -225,26 +236,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return itemList;
     }
-    // Get items sorted by most used (descending order of usage_count)
-    public Cursor search (String searchString) {
-        SQLiteDatabase mReadableDB = this.getReadableDatabase();
-        String[] columns = new String[]{COLUMN_NAME};
-        searchString = "%" + searchString + "%";
-        String where = COLUMN_NAME + " LIKE ?";
-        String[]whereArgs = new String[]{searchString};
-
-        Cursor cursor = null;
-
-        try {
-            if (mReadableDB == null) {mReadableDB = getReadableDatabase();}
-            cursor = mReadableDB.query(TABLE_ITEMS, columns, where, whereArgs, null, null, null);
-        } catch (Exception e) {
-            String test = "Here";
-        }
-
-        String test = cursor.getString(0);
-        return cursor;
-    }
 
     public void set_priority(String name, int i)
     {
@@ -266,5 +257,99 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_DATE + " = \"" + date + "\"";
         db.execSQL(query);
         db.close();
+    }
+
+    public int get_number_of_foods() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT COUNT(*) FROM " + TABLE_FOOD;
+        Cursor cursor = db.rawQuery(query, null);
+        cursor.moveToFirst();
+        int sum = cursor.getInt(0);
+        cursor.close();
+        return sum;
+
+    }
+    public List<String> get_food_names() {
+        List<String> itemList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COLUMN_NAME + " FROM " + TABLE_FOOD;
+        Cursor cursor = db.query(TABLE_FOOD, new String[]{COLUMN_NAME},
+                null, null, null, null, COLUMN_NAME + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
+
+        if (cursor.moveToFirst()) {
+            do {
+                String itemName = cursor.getString(0);
+                itemList.add(itemName);
+            } while (cursor.moveToNext());
+            cursor.close();
+
+        }
+        return itemList;
+    }
+
+    public void set_food_to_day(String food_name, String day) {
+
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_DAY, day);
+        values.put(COLUMN_FOOD, food_name);// Initial usage count is 0
+        db.insert(TABLE_DAY_FOOD, null, values);
+        db.close();
+    }
+
+    public List<String> get_days_food(String pos)
+    {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String  food_name = "";
+        List<String> food_of_day = new ArrayList<>();
+
+        String query = "SELECT * FROM " + TABLE_DAY_FOOD + " WHERE " + COLUMN_DAY + " = \"" + pos + "\"" ;
+        int i = 0;
+        Cursor cursor = db.rawQuery(query, null);// new String[]{pos});
+        if(cursor.moveToFirst())
+        {
+            do
+            {
+                food_name = cursor.getString(2);
+            }
+            while(cursor.moveToNext());
+        }
+        cursor.close();
+        query = "SELECT * FROM " + TABLE_FOOD + " WHERE " + COLUMN_NAME + " = ?";
+        cursor = db.rawQuery(query, new String[]{food_name});
+        if(cursor.moveToFirst()) {
+            do {
+                food_name = cursor.getString(1);
+                String ingredients = cursor.getString(2);
+                food_of_day.add(food_name);
+                food_of_day.add(ingredients);
+            }
+            while (cursor.moveToNext());
+            cursor.close();
+        }
+        return (food_of_day.size()==0) ? null : food_of_day;
+
+
+    }
+
+    public void remove_from_food_table(CharSequence text) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "DELETE FROM " + TABLE_FOOD + " WHERE "+ COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{text.toString()});
+        db.close();
+    }
+
+    public String get_ingred_for_food(String string) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String food_ingred = "";
+        String query = "Select " + COLUMN_INGREDIENTS + " FROM " + TABLE_FOOD + " Where " + COLUMN_NAME + "=?";
+        Cursor cursor = db.rawQuery(query, new String[]{string});
+        if(cursor.moveToFirst())
+        {
+            do {
+                food_ingred = cursor.getString(0);
+            }while(cursor.moveToNext());
+        }
+        return food_ingred;
     }
 }

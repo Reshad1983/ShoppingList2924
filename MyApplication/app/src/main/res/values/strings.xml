@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Shopping list</string>
     <string name="search">SAR</string>
+    <string name="food">Food name</string>
+    <string name="Sort">S</string>
+    <string name="monday">Mo</string>
+    <string name="tuesday">Tu</string>
+    <string name="wednesday">We</string>
+    <string name="thursday">th</string>
+    <string name="friday">Fr</string>
+    <string name="saturday">Sa</string>
+    <string name="sunday">Su</string>
 </resources>
