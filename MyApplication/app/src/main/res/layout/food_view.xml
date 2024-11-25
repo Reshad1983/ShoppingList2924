@@ -9,8 +9,20 @@
     android:orientation="horizontal"
     android:padding="5dp">
         <TextView
+            android:id="@+id/add_ingredient_to_food_id"
+            android:layout_width="30dp"
+            android:layout_height="35dp"
+            android:layout_margin="3dp"
+            android:background="@drawable/ic_add"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/transparent_corner"
+            android:textSize="18sp"/>
+        <TextView
             android:id="@+id/food_name_view_id"
-            android:layout_width="match_parent"
+            android:layout_width="250dp"
             android:layout_height="35dp"
             android:layout_margin="3dp"
             android:background="@drawable/rounded_corner"
@@ -20,5 +32,18 @@
             android:gravity="center"
             android:textColor="@color/transparent_corner"
             android:textSize="18sp"
+            android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/remove_food_id"
+            android:layout_width="40dp"
+            android:layout_height="35dp"
+            android:layout_margin="3dp"
+            android:background="@android:drawable/ic_delete"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textColor="@color/transparent_corner"
+            android:textSize="25sp"
             android:textStyle="bold"/>
 </LinearLayout>

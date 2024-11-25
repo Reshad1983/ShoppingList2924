@@ -272,7 +272,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<String> get_food_names() {
         List<String> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        String query = "SELECT " + COLUMN_NAME + " FROM " + TABLE_FOOD;
         Cursor cursor = db.query(TABLE_FOOD, new String[]{COLUMN_NAME},
                 null, null, null, null, COLUMN_NAME + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
@@ -333,9 +332,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     public void remove_from_food_table(CharSequence text) {
+        String food_name = text.toString();
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "DELETE FROM " + TABLE_FOOD + " WHERE "+ COLUMN_NAME + " = ?";
-        db.execSQL(query, new String[]{text.toString()});
+        db.execSQL(query, new String[]{food_name});
         db.close();
     }
 
@@ -351,5 +351,44 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }while(cursor.moveToNext());
         }
         return food_ingred;
+    }
+
+    public void add_ingred_to_food(String string) {
+
+        String food_name = "";
+        if(string.contains(":"))
+        {
+            string.split(":")[1].trim();
+        }
+        else {
+            food_name = string;
+        }
+        String ingredients = "";
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + COLUMN_INGREDIENTS + " FROM "  + TABLE_FOOD + " WHERE " + COLUMN_NAME + " =?";
+        Cursor cursor = db.rawQuery(query, new String[]{food_name});
+        if(cursor.moveToFirst())
+        {
+            do {
+                ingredients = cursor.getString(0);
+            }while(cursor.moveToNext());
+        }
+
+        StringBuilder ingredients_to_add = new StringBuilder();
+        cursor.close();
+        query = "SELECT " + COLUMN_NAME + " FROM "  + TABLE_ITEMS + " WHERE " + COLUMN_STATUS + " = \"1\"";
+        cursor = db.rawQuery(query, null);
+        if(cursor.moveToFirst())
+        {
+            do {
+                ingredients_to_add.append("-").append(cursor.getString(0));// = cursor.getString(0);
+            }while(cursor.moveToNext());
+        }
+        cursor.close();
+        ingredients_to_add.append("-").append(ingredients);
+        db = getWritableDatabase();
+        query = "UPDATE "+ TABLE_FOOD + " SET " + COLUMN_INGREDIENTS + " = \"" + ingredients_to_add + "\" WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{food_name});
+        db.close();
     }
 }

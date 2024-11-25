@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.GradientDrawable;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.os.Bundle;
@@ -192,6 +190,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         food_sum_view.setOnClickListener(v -> {
             if(v.getId() == R.id.food_sum_id)
             {
+                reset_btn_color();
+                day_food_to_show.clear();
                 list_view.removeAllViews();
                 List<String> food_list = sdb.get_food_names();
                 add_food_to_view(food_list);
@@ -208,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         //This part is for recipe registration
         plus_btn.setOnLongClickListener(v -> {
+            list_of_ingredients = new StringBuilder();
             if(search_item.getText().toString().isEmpty())
             {
                 Toast.makeText(MainActivity.this, "Please enter food name!", Toast.LENGTH_SHORT).show();
@@ -229,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 {
                     if(item.getStatus().equals("1"))
                     {
-                        list_of_ingredients.append(" ").append(item.getName());
+                        list_of_ingredients.append("-").append(item.getName());
                     }
                 }
                 //Here to add food name and ingredients to database
@@ -498,13 +499,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void add_food_name_to_layout(View foodView, String item) {
         TextView item_name = foodView.findViewById(R.id.food_name_view_id);
+        TextView add_ingredient = foodView.findViewById(R.id.add_ingredient_to_food_id);
+        TextView delete_food_view = foodView.findViewById(R.id.remove_food_id);
         item_name.setText(item);
-        item_name.setOnLongClickListener(new View.OnLongClickListener() {
+        add_ingredient.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                list_view.removeView(foodView);
-                sdb.remove_from_food_table(item_name.getText());
+                sdb.add_ingred_to_food(item_name.getText().toString());
                 return false;
+            }
+        });
+        item_name.setOnLongClickListener(v -> {
+            list_view.removeView(foodView);
+            sdb.remove_from_food_table(item_name.getText());
+            return false;
+        });
+        delete_food_view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                list_view.removeView(foodView);
+                sdb.remove_from_food_table(item_name.getText().toString());
+                Toast.makeText(MainActivity.this, "Food removed from the list!",Toast.LENGTH_LONG).show();
             }
         });
 
@@ -530,7 +545,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-                String[]ingredients = day_food.split(" ");
+                String[]ingredients = day_food.split("-");
                 for (String ingredient : ingredients) {
                     for (NameStatusPair item : items) {
                         if (item.getName().equals(ingredient)) {
@@ -785,7 +800,6 @@ private boolean is_a_number(String string)
 
         List<NameStatusPair> search_items = new ArrayList<>();
         List<NameStatusPair >items;
-        reset_btn_color();
         String pos = getString(v);
         list_view.removeAllViews();
         try {
@@ -804,6 +818,7 @@ private boolean is_a_number(String string)
         else
         {
 
+            reset_btn_color();
             search_item.setText("");
             try {
                 items = sdb.getItemsSortedByUsage();
@@ -834,7 +849,7 @@ private boolean is_a_number(String string)
         {
             day_food = sdb.get_days_food(day);
             if(day_food != null) {
-                ingredients = day_food.get(1).split(" ");
+                ingredients = day_food.get(1).split("-");
                 for (String ingredient : ingredients) {
                     for (NameStatusPair item : items) {
                         if (item.getName().equals(ingredient)) {
