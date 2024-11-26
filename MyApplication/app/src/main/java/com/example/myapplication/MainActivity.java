@@ -21,6 +21,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -105,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView eight_btn;
     TextView nine_btn;
 
-
+    TextView day_select;
     LinearLayout search_layout;
     LinearLayout fast_search_layout;
     LinearLayout food_hole_view;
@@ -138,6 +140,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String first_time_to_insert = myPre.getString(FIRST_ENTRY, "first_time_to_insert_items");
         sc_view = findViewById(R.id.scroll_view_id);
         TextView search_btn = search_layout.findViewById(R.id.search_btn);
+        day_select = search_layout.findViewById(R.id.day_select_id);
+
         sd_num_view = fast_search_layout.findViewById(R.id.sdb_num_id);
         minus_btn = food_hole_view.findViewById(R.id.minus_btn_id);
         plus_btn = food_hole_view.findViewById(R.id.plus_btn_id);
@@ -186,17 +190,48 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
         eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
         nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
+
+        day_select.setOnClickListener(v -> {
+            String selected_day_string = day_select.getText().toString();
+            switch (selected_day_string) {
+                case "Day":
+                    day_select.setText(R.string.monday);
+                    break;
+                case "Mo":
+                    day_select.setText(R.string.tuesday);
+                    break;
+                case "Tu":
+                    day_select.setText(R.string.wednesday);
+                    break;
+                case "We":
+                    day_select.setText(R.string.thursday);
+                    break;
+                case "Th":
+                    day_select.setText(R.string.friday);
+                    break;
+                case "Fr":
+                    day_select.setText(R.string.saturday);
+                    break;
+                case "Sa":
+                    day_select.setText(R.string.sunday);
+                    break;
+                case "Su":
+                    day_select.setText(R.string.day);
+                    break;
+            }
+
+        });
+
+
         food_sum_view.setText(sdb.get_number_of_foods() + "");
         food_sum_view.setOnClickListener(v -> {
-            if(v.getId() == R.id.food_sum_id)
-            {
                 reset_btn_color();
                 day_food_to_show.clear();
                 list_view.removeAllViews();
-                List<String> food_list = sdb.get_food_names();
-                add_food_to_view(food_list);
-
-            }
+                List<FoodDay> food_list = sdb.get_food_names();
+                List<String> food_name_list = new ArrayList<>();
+                for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
+                add_food_to_view(food_name_list);
         });// = fast_search_layout.findViewById(R.id.nine_id);
         if (first_time_to_insert.equals("first_time_to_insert_items")) {
             for (NamePosPair item : items) {
@@ -234,7 +269,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 //Here to add food name and ingredients to database
-                sdb.add_food(search_item.getText().toString(), list_of_ingredients.toString());
+                sdb.add_food(search_item.getText().toString(), list_of_ingredients.toString(), day_select.getText().toString());
+                food_sum_view.setText(sdb.get_food_names().size()+"");
                 search_item.setText("");
                 Toast.makeText(MainActivity.this, "New food added!", Toast.LENGTH_SHORT).show();
             }
@@ -502,25 +538,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView add_ingredient = foodView.findViewById(R.id.add_ingredient_to_food_id);
         TextView delete_food_view = foodView.findViewById(R.id.remove_food_id);
         item_name.setText(item);
-        add_ingredient.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                sdb.add_ingred_to_food(item_name.getText().toString());
-                return false;
-            }
+        add_ingredient.setOnLongClickListener(v -> {
+            sdb.add_ingredients_to_food(item_name.getText().toString(), day_select.getText().toString());
+            Toast.makeText(MainActivity.this, "Ingredient added!", Toast.LENGTH_SHORT).show();
+            return false;
         });
         item_name.setOnLongClickListener(v -> {
+
             list_view.removeView(foodView);
             sdb.remove_from_food_table(item_name.getText());
             return false;
         });
-        delete_food_view.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                list_view.removeView(foodView);
-                sdb.remove_from_food_table(item_name.getText().toString());
-                Toast.makeText(MainActivity.this, "Food removed from the list!",Toast.LENGTH_LONG).show();
-            }
+        delete_food_view.setOnClickListener(v -> {
+            list_view.removeView(foodView);
+            sdb.remove_from_food_table(item_name.getText().toString());
+            Toast.makeText(MainActivity.this, "Food removed from the list!",Toast.LENGTH_LONG).show();
         });
 
         item_name.setOnClickListener(v -> {
@@ -532,31 +564,35 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
         });
-        item_name.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
+        item_name.setOnLongClickListener(v -> {
+            day_food_to_show.clear();
+            reset_btn_color();
+            if(!search_item.getText().toString().isEmpty() && (!is_a_number(search_item.getText().toString())))
+            {
+                sdb.update_food_name(search_item.getText().toString(), item_name.getText().toString());
+                item_name.setText(search_item.getText());
+            }
 
-                List<NameStatusPair> search_items = new ArrayList<>();
-                list_view.removeAllViews();
-                String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
-                List<NameStatusPair> items;
-                try {
-                    items = sdb.getItemsSortedByUsage();
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-                String[]ingredients = day_food.split("-");
-                for (String ingredient : ingredients) {
-                    for (NameStatusPair item : items) {
-                        if (item.getName().equals(ingredient)) {
-                            search_items.add(item);
-                        }
+            List<NameStatusPair> search_items = new ArrayList<>();
+            list_view.removeAllViews();
+            String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
+            List<NameStatusPair> items;
+            try {
+                items = sdb.getItemsSortedByUsage();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            String[]ingredients = day_food.split("-");
+            for (String ingredient : ingredients) {
+                for (NameStatusPair item1 : items) {
+                    if (item1.getName().equals(ingredient)) {
+                        search_items.add(item1);
                     }
                 }
-                add_one_food_to_view(item_name.getText().toString());
-                add_items_to_view(search_items);
-                return false;
             }
+            add_one_food_to_view(item_name.getText().toString());
+            add_items_to_view(search_items);
+            return false;
         });
         list_view.addView(foodView);
 
@@ -817,7 +853,7 @@ private boolean is_a_number(String string)
         }
         else
         {
-
+            day_food_to_show.clear();
             reset_btn_color();
             search_item.setText("");
             try {
@@ -830,6 +866,7 @@ private boolean is_a_number(String string)
                     search_items.add(item_pos_search);
                 }
             }
+            v.setBackgroundResource(R.drawable.checked);
             sd_num_view.setText(String.format("%d",search_items.size()));
             sd_num_view.setBackgroundResource(R.drawable.checked);
             add_items_to_view(search_items);
@@ -878,7 +915,7 @@ private boolean is_a_number(String string)
     }
 
     private static final Set<String> WEEKDAYS = new HashSet<>(Arrays.asList(
-            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+            "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"
     ));
 
     // Method to check if a string is a weekday name
@@ -937,35 +974,35 @@ private boolean is_a_number(String string)
         }
         else if(i == R.id.mon_id)
         {
-            pos = "Monday";
+            pos = "Mo";
         }
         else if(i == R.id.tus_id)
         {
 
-            pos = "Tuesday";
+            pos = "Tu";
         }
         else if(i == R.id.wed_id)
         {
 
-            pos = "Wednesday";
+            pos = "We";
         }
         else if(i == R.id.thu_id)
         {
 
-            pos = "Thursday";
+            pos = "Th";
         }
         else if(i == R.id.fri_id)
         {
-            pos = "Friday";
+            pos = "Fr";
         }
         else if(i == R.id.sat_id)
         {
-            pos = "Saturday";
+            pos = "Sa";
         }
         else if(i == R.id.sun_id)
         {
 
-            pos = "Sunday";
+            pos = "Su";
         }
         if (v.getBackground().getConstantState() == getResources().getDrawable(R.drawable.checked).getConstantState())
         {
@@ -1013,19 +1050,34 @@ private boolean is_a_number(String string)
     private void get_random_day_food()
     {
         day_food_to_show.clear();
-        day_food_to_show.add("Monday");
-        day_food_to_show.add("Tuesday");
-        day_food_to_show.add("Wednesday");
-        day_food_to_show.add("Thursday");
-        day_food_to_show.add("Friday");
-        day_food_to_show.add("Saturday");
-        day_food_to_show.add("Sunday");
-        List<String> food_list = sdb.get_food_names();
-        Random rand = new Random();
-        for (String s : day_food_to_show) {
-            String food_name = food_list.get(rand.nextInt(food_list.size()));
-            sdb.set_food_to_day(food_name, s);
-            food_list.remove(food_name);
+        day_food_to_show.add("Mo");
+        day_food_to_show.add("Tu");
+        day_food_to_show.add("We");
+        day_food_to_show.add("Th");
+        day_food_to_show.add("Fr");
+        day_food_to_show.add("Sa");
+        day_food_to_show.add("Su");
+        List<FoodDay> food_list = sdb.get_food_names();
+        for (String s : day_food_to_show)
+        {
+            Collections.shuffle(food_list);
+           for(FoodDay food_day: food_list)
+           {
+
+               //FoodDay food_name = food_list.get(rand.nextInt(food_list.size()));
+               if((food_day.getDay().equals("Day") || food_day.getDay().equals(s)) && (food_day.getUsage() == 0))
+               {
+                   sdb.set_food_to_day(food_day.getFoodName(), s);
+                   sdb.update_last_week_usage(food_day.getFoodName(), 1);
+                   food_list.remove(food_day);
+                   break;
+               }
+
+           }
+        }
+        for(FoodDay food : food_list)
+        {
+            sdb.update_last_week_usage(food.getFoodName(), 0);
         }
         List<NameStatusPair> items;
         try {

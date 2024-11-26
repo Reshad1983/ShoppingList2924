@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.text.Editable;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -16,7 +17,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database Name and Version
     private static final String DATABASE_NAME = "items.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 11;
     // Table and Columns
     private static final String TABLE_ITEMS = "items";
     private static final String TABLE_FOOD = "food_recepies";
@@ -34,6 +35,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_INGREDIENTS = "Ingrediences" ;
     private static final String COLUMN_DAY = "day_of_week";
     private static final String COLUMN_FOOD = "food_name";
+    private static final String DAY_TO_COOK = "food_day";
+    private static final String USED_LAST_WEEK = "used_last_week";
+
 
 
     public DatabaseHelper(Context context) {
@@ -54,11 +58,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if exists
         if(oldVersion < newVersion ) {
-            String CREATE_ITEMS_TABLE = "CREATE TABLE " + TABLE_DAY_FOOD + " (" +
-                    COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                    COLUMN_DAY + " TEXT NOT NULL, " +
-                    COLUMN_FOOD + " TEXT)";
+
+            String CREATE_ITEMS_TABLE = "ALTER TABLE " + TABLE_FOOD + " ADD " +
+                    USED_LAST_WEEK + " INTEGER ";
             db.execSQL(CREATE_ITEMS_TABLE);
+
         }
         else {
 
@@ -68,11 +72,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // Create table again
     }    // Add a new item
-    public void add_food(String name, String ingredients) {
+    public void add_food(String name, String ingredients, String day) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
         values.put(COLUMN_INGREDIENTS, ingredients);// Initial usage count is 0
+        values.put(DAY_TO_COOK, day);
         db.insert(TABLE_FOOD, null, values);
         db.close();
     }
@@ -269,16 +274,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return sum;
 
     }
-    public List<String> get_food_names() {
-        List<String> itemList = new ArrayList<>();
+    public List<FoodDay> get_food_names() {
+        List<FoodDay> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_FOOD, new String[]{COLUMN_NAME},
+        Cursor cursor = db.query(TABLE_FOOD, new String[]{COLUMN_NAME, DAY_TO_COOK, USED_LAST_WEEK},
                 null, null, null, null, COLUMN_NAME + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
             do {
                 String itemName = cursor.getString(0);
-                itemList.add(itemName);
+                String item_day = cursor.getString(1);
+                int item_usage = cursor.getString(2) == null? 0 : Integer.parseInt(cursor.getString(2));
+                itemList.add(new FoodDay(itemName, item_day, item_usage));
             } while (cursor.moveToNext());
             cursor.close();
 
@@ -293,6 +300,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DAY, day);
         values.put(COLUMN_FOOD, food_name);// Initial usage count is 0
         db.insert(TABLE_DAY_FOOD, null, values);
+        update_last_week_usage(food_name, 1);
+        db.close();
+    }
+
+    public void update_last_week_usage(String foodName, int status) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_FOOD + " SET " + USED_LAST_WEEK + " = \"" + status + "\" WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{foodName});
         db.close();
     }
 
@@ -353,12 +368,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return food_ingred;
     }
 
-    public void add_ingred_to_food(String string) {
+    public void add_ingredients_to_food(String string, String day) {
 
         String food_name = "";
         if(string.contains(":"))
         {
-            string.split(":")[1].trim();
+            food_name = string.split(":")[1].trim();
         }
         else {
             food_name = string;
@@ -387,8 +402,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cursor.close();
         ingredients_to_add.append("-").append(ingredients);
         db = getWritableDatabase();
-        query = "UPDATE "+ TABLE_FOOD + " SET " + COLUMN_INGREDIENTS + " = \"" + ingredients_to_add + "\" WHERE " + COLUMN_NAME + " = ?";
+        query = "UPDATE "+ TABLE_FOOD + " SET " + COLUMN_INGREDIENTS + " = \"" + ingredients_to_add + "\" , " + DAY_TO_COOK + " = \"" + day +"\""+ " WHERE " + COLUMN_NAME + " = ?";
         db.execSQL(query, new String[]{food_name});
         db.close();
     }
+
+    public void update_food_name(String food_name, String old_name) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = " UPDATE " + TABLE_FOOD + " SET " +COLUMN_NAME + " = \"" + food_name + " \"" + " WHERE " + COLUMN_NAME + " =?";
+        db.execSQL(query, new String[]{old_name});
+        db.close();
+    }
+
 }
