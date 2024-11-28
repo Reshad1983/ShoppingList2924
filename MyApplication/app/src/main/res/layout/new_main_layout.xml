@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <EditText
+        android:id="@+id/con_search_id"
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="24dp"
+        android:background="@drawable/hole_view"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="@string/search"
+        android:inputType="text"
+        app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
+        app:layout_constraintEnd_toStartOf="@+id/con_day_id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/con_day_id"
+        app:layout_constraintVertical_bias="0.13999999" />
+
+    <TextView
+        android:id="@+id/con_day_id"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="45dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/day"
+        app:layout_constraintEnd_toStartOf="@+id/con_search_btn"
+        app:layout_constraintStart_toEndOf="@+id/con_search_id"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/con_search_btn"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/search"
+        app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/con_day_id"
+        app:layout_constraintTop_toTopOf="@+id/con_day_id" />
+
+    <TextView
+        android:id="@+id/con_sort"
+        android:layout_width="30dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="45dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/Sort"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/one_con_id"
+        android:layout_width="30dp"
+        android:layout_height="57dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="1"
+        app:layout_constraintStart_toStartOf="@+id/con_sort"
+        app:layout_constraintTop_toTopOf="@+id/con_sc_id" />
+
+    <TextView
+        android:id="@+id/two_con_id"
+        android:layout_width="30dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="2"
+        app:layout_constraintStart_toStartOf="@+id/one_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/one_con_id" />
+
+    <TextView
+        android:id="@+id/three_con_id"
+        android:layout_width="30dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="28dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="3"
+        app:layout_constraintStart_toStartOf="@+id/two_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/two_con_id" />
+
+    <TextView
+        android:id="@+id/four_con_id"
+        android:layout_width="30dp"
+        android:layout_height="47dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="4"
+        app:layout_constraintStart_toStartOf="@+id/three_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/three_con_id" />
+
+    <TextView
+        android:id="@+id/five_con_id"
+        android:layout_width="30dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="34dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="5"
+        app:layout_constraintStart_toStartOf="@+id/four_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/four_con_id" />
+
+    <TextView
+        android:id="@+id/six_con_id"
+        android:layout_width="30dp"
+        android:layout_height="41dp"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="6"
+        app:layout_constraintStart_toStartOf="@+id/five_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/five_con_id" />
+
+    <TextView
+        android:id="@+id/seven_con_id"
+        android:layout_width="30dp"
+        android:layout_height="38dp"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="7"
+        app:layout_constraintStart_toStartOf="@+id/six_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/six_con_id" />
+
+    <TextView
+        android:id="@+id/eight_con_id"
+        android:layout_width="30dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="38dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="8"
+        app:layout_constraintStart_toStartOf="@+id/seven_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/seven_con_id" />
+
+    <TextView
+        android:id="@+id/nine_con_id"
+        android:layout_width="32dp"
+        android:layout_height="30dp"
+        android:layout_marginTop="21dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="9"
+        app:layout_constraintBottom_toBottomOf="@+id/con_sc_id"
+        app:layout_constraintStart_toStartOf="@+id/eight_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/eight_con_id" />
+
+    <TextView
+        android:id="@+id/con_min_id"
+        android:layout_width="30dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:drawable/arrow_down_float"
+        android:gravity="center"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/con_search_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_plus_id"
+        android:layout_width="30dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+        android:background="@android:drawable/arrow_up_float"
+        android:gravity="center"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_min_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_mon_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/monday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_plus_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_tus_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/tuesday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_mon_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_wed_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/wednesday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_tus_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_thu_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="48dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/thursday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_wed_id"
+        app:layout_constraintTop_toTopOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_fri_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/friday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_thu_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <TextView
+        android:id="@+id/con_sat_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/saturday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_fri_id"
+        app:layout_constraintTop_toTopOf="@+id/con_fri_id" />
+
+    <TextView
+        android:id="@+id/con_sun_id"
+        android:layout_width="28dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/sunday"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_sat_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_day_id" />
+
+    <TextView
+        android:id="@+id/food_list_id"
+        android:layout_width="40dp"
+        android:layout_height="45dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/Sort"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/con_search_btn"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+
+    <ScrollView
+        android:id="@+id/con_sc_id"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="45dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/con_search_btn"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/con_wed_id"
+        app:layout_constraintVertical_bias="0.0">
+
+        <LinearLayout
+            android:id="@+id/con_item_view"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintStart_toEndOf="@+id/six_con_id"
+            app:layout_constraintTop_toTopOf="@+id/one_con_id" />
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
