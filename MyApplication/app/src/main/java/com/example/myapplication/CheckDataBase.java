@@ -54,28 +54,30 @@ public class CheckDataBase extends Service {
         Runnable runnable_task = new Runnable()
         {
             @Override
-            public void run()
-            {
-                List<NameStatusPair> items = null;
-                try
-                {
+            public void run() {
+                List<NameStatusPair> items;
+                try{
                     items = dbh.getItemsSortedByUsage();
-                } catch (ParseException e)
-                {
+                } catch (ParseException e){
                     throw new RuntimeException(e);
                 }
                 StringBuilder message = prior_list( dbh, items);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String today_date = sdf.format(new Date());
                 String first_time_to_insert = myPre.getString(FIRST_DATE, "");
-              if(!today_date.equals(first_time_to_insert))
-              {
+           if(!today_date.equals(first_time_to_insert)){
                   SharedPreferences.Editor editor = myPre.edit();
                   editor.putString(FIRST_DATE, today_date);
                   editor.apply();
                   for (NameStatusPair item : items) {
-                      Date date = item.get_date();
-                      if (date != null) {
+                      String date_string = item.get_date();
+                      if (date_string != null) {
+                          Date date;
+                          try {
+                              date = sdf.parse(date_string);
+                          } catch (ParseException e) {
+                              date = new Date();
+                          }
                           int interval = Integer.parseInt(item.get_interval());
                           Calendar c = Calendar.getInstance();
                           c.setTime(date); // Using today's date

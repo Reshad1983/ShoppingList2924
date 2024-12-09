@@ -10,7 +10,7 @@ public class NameStatusPair {
     private String duration;
     private String prio;
     private String interval;
-    private Date date;
+    private String date;
 
     public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio)
     {
@@ -22,7 +22,7 @@ public class NameStatusPair {
         this.prio = prio;
     }
 
-    public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio, String method_interval, Date date)
+    public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio, String method_interval, String date)
     {
         this.name = name;
         this.status = status;
@@ -46,7 +46,7 @@ public class NameStatusPair {
     {
         return this.name;
     }
-    public Date get_date(){return this.date;}
+    public String get_date(){return this.date;}
     public String get_interval(){return this.interval;}
     public String getStatus(){return this.status; }
     public String getUsage()
@@ -57,6 +57,7 @@ public class NameStatusPair {
     {
         return this.pos;
     }
+    public String getDate(){return this.date;}
     public void setStatus(String status)
     {
         this.status = status;
@@ -79,5 +80,6 @@ public class NameStatusPair {
     }
     public void set_interval(String interval){this.interval = interval;}
     public void set_prio(String prio){this.prio = prio;}
+    public void set_date(String mDate){this.date = mDate;}
 }
 

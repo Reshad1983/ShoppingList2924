@@ -10,5 +10,8 @@
     <string name="friday">Fr</string>
     <string name="day">Day</string>
     <string name="saturday">Sa</string>
+    <string name="week">Week</string>
     <string name="sunday">Su</string>
+    <string name="random">R -</string>
+    <string name="add">A+</string>
 </resources>

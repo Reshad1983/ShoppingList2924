@@ -167,7 +167,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE},
-                null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_USAGE_COUNT + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
+                null, null, null, null, COLUMN_PRIORITY + " ASC, " + COLUMN_STATUS + " ASC, "+ COLUMN_USAGE_COUNT + " ASC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
             do {
@@ -183,8 +183,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 {
                     date_string = null;
                 }
-                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
-                Date date;
+                SimpleDateFormat sfd = new SimpleDateFormat("yy-MM-dd");
+                /* Date date;
                 if(date_string != null && (date_string.length() > 4))
                 {
                     date = sfd.parse(date_string);
@@ -193,8 +193,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 {
 
                     date = null;
-                }
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date));
+                }*/
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date_string));
             } while (cursor.moveToNext());
         }
 
@@ -206,7 +206,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE},
-                null, null, null, null, COLUMN_PRIORITY + " DESC, " + COLUMN_STATUS + " DESC, "+ COLUMN_POS + " DESC");//, "+COLUMN_USAGE_COUNT+" DESC");
+                null, null, null, null, COLUMN_PRIORITY + " ASC, " + COLUMN_STATUS + " ASC, "+ COLUMN_POS + " ASC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
             do {
@@ -218,7 +218,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String item_prio = cursor.getString((5));
                 String interval = cursor.getString((6));
                 String date_string = cursor.getString((7));
-                if(date_string != null && date_string.contains("d"))
+               /*if(date_string != null && date_string.contains("d"))
                 {
                     date_string = null;
                 }
@@ -232,8 +232,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 {
 
                     date = null;
-                }
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date));
+                }*/
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date_string));
             } while (cursor.moveToNext());
         }
 
