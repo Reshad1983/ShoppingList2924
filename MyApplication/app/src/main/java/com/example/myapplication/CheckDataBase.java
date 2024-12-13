@@ -66,9 +66,12 @@ public class CheckDataBase extends Service {
                 String today_date = sdf.format(new Date());
                 String first_time_to_insert = myPre.getString(FIRST_DATE, "");
            if(!today_date.equals(first_time_to_insert)){
-                  SharedPreferences.Editor editor = myPre.edit();
-                  editor.putString(FIRST_DATE, today_date);
-                  editor.apply();
+              SharedPreferences.Editor editor = myPre.edit();
+              editor.putString(FIRST_DATE, today_date);
+              editor.apply();
+               sdf = new SimpleDateFormat("E");
+               today_date = sdf.format(new Date());
+                if(today_date.equals("Fri")){
                   for (NameStatusPair item : items) {
                       String date_string = item.get_date();
                       if (date_string != null) {
@@ -82,19 +85,21 @@ public class CheckDataBase extends Service {
                           Calendar c = Calendar.getInstance();
                           c.setTime(date); // Using today's date
                           c.add(Calendar.DATE, interval); // Adding 5 days
+                          sdf = new SimpleDateFormat("yyyy-MM-dd");
                           String buy_date_to_now = sdf.format(c.getTime());
-                          if (today_date.equals(buy_date_to_now)) {
+                          today_date = sdf.format(new Date());
+                          if (today_date.compareTo(buy_date_to_now) > 0) {
                               dbh.update_status(1, item.getName());
                               Log.d("Handlers", "Time to buy");
-
                               message.append("\n").append(item.getName());
                           }
                       }
                   }
+                }
               }
                     updateNotification(message.toString());
                     Log.d("Handlers", "Message updated.");
-                handler.postDelayed(this, 3600000);
+                handler.postDelayed(this, 7200000);
             }
         };
         handler.post(runnable_task);

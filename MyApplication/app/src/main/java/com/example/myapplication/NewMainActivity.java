@@ -7,6 +7,7 @@ import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -23,6 +24,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -34,7 +36,6 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
     TextView sd_num_view;
     TextView food_sum_view;
     TextView week_view;
-    TextView minus_btn;
     TextView plus_btn;
     LinearLayout list_view;
     LinearLayout buy_list;
@@ -59,7 +60,6 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
     private List<String> day_food_to_show;
 
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.new_main_layout);
@@ -74,13 +74,10 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
         day_select = findViewById(R.id.con_day_id);
 
         sd_num_view = findViewById(R.id.con_sort);
-        minus_btn = findViewById(R.id.con_min_id);
         plus_btn = findViewById(R.id.con_plus_id);
         week_view = findViewById(R.id.con_sun_id);
         day_select.setOnLongClickListener(this);
         week_view.setOnClickListener(this);
-
-
         day_food_to_show = new ArrayList<>();
         day_food_to_show.add("Mo");
         day_food_to_show.add("Tu");
@@ -136,10 +133,7 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
                     day_select.setText(R.string.day);
                     break;
             }
-
         });
-
-
         food_sum_view.setOnClickListener(v -> {
             food_sum_view.setText(sdb.get_number_of_foods() + "");
             food_sum_view.setBackgroundResource(R.drawable.checked);
@@ -152,30 +146,27 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
             add_food_to_view(food_name_list);
             handler.postDelayed(() -> food_sum_view.setBackgroundResource(R.drawable.hole_view), 300);
         });
-
         //This part is for recipe registration
         plus_btn.setOnLongClickListener(v -> {
             list_of_ingredients = new StringBuilder();
-            if(search_item.getText().toString().isEmpty())
-            {
+            if(search_item.getText().toString().isEmpty()){
+                list_view.removeAllViews();
+                buy_list.removeAllViews();
+                get_random_day_food();
+                Toast.makeText(NewMainActivity.this, "Food for week added!", Toast.LENGTH_SHORT).show();
+            }
+            else if(is_a_number(search_item.getText().toString()))            {
                 Toast.makeText(NewMainActivity.this, "Please enter food name!", Toast.LENGTH_SHORT).show();
             }
-            else if(is_a_number(search_item.getText().toString()))
-            {
-                Toast.makeText(NewMainActivity.this, "Please enter food name!", Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
+            else{
                 List<NameStatusPair> food_items;
                 try {
                     food_items = sdb.getItemsSortedByPosition();
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
-                for(NameStatusPair item: food_items)
-                {
-                    if(item.getStatus().equals("1"))
-                    {
+                for(NameStatusPair item: food_items){
+                    if(item.getStatus().equals("1")){
                         list_of_ingredients.append("-").append(item.getName());
                     }
                 }
@@ -188,22 +179,6 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
 
             return false;
         });
-
-        /*minus_btn.setOnClickListener(v -> {
-            num_of_days = (num_of_days > 7)?(num_of_days - 7):90;
-            search_item.setText(num_of_days + "");
-        });*/
-        minus_btn.setOnLongClickListener(v -> {
-            list_view.removeAllViews();
-            buy_list.removeAllViews();
-            get_random_day_food();
-            return false;
-        });
-     /*   plus_btn.setOnClickListener(v -> {
-            num_of_days = (num_of_days < 90)?(num_of_days + 7):7;
-            search_item.setText(num_of_days + "");
-
-        });*/
         search_btn.setOnLongClickListener(v -> {
             reset_btn_color();
             String search_text = search_item.getText().toString();
@@ -215,12 +190,10 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
                 sdb.reset_status();
                 Toast.makeText(NewMainActivity.this, "Status reset!", Toast.LENGTH_LONG).show();
             }// If user entered just a number then an item interval should be updated
-            else if (is_a_number(search_text))
-            {
+            else if (is_a_number(search_text)) {
                 Toast.makeText(this, "Press the view", Toast.LENGTH_LONG).show();
                 search_item.setText("");
-            } else
-            {
+            } else{
                 int pos = 0;
                 int duration = 0;
                 //If user entered 3 separated input in search box and two of them are numbers then it must be name, position and duration
@@ -263,7 +236,6 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
                     sdb.add_item(search_name_pos_duration[0], pos, 1);
                     Toast.makeText(this, "New Item added!", Toast.LENGTH_LONG).show();
                 }
-
                 search_item.setText("");
             }
             List<NameStatusPair> items;
@@ -272,7 +244,6 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
             } catch (ParseException e) {
                 throw new RuntimeException(e);
             }
-
             add_items_to_view(items);
             return true;
         });
@@ -335,7 +306,6 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
                 search_item.setText("");
                 search_item.setHint("Not found!");
             }
-
         });
         List<NameStatusPair> items;
         try {
@@ -505,8 +475,7 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
         TextView item_interval = itemView.findViewById(R.id.con_interval_id);
         TextView item_use = itemView.findViewById(R.id.con_usa_id);
         item_interval.setOnClickListener(v -> {
-            if(!search_item.getText().toString().isEmpty())
-            {
+            if(!search_item.getText().toString().isEmpty()){
                 if(is_a_number(search_item.getText().toString()))
                 {
                     sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());

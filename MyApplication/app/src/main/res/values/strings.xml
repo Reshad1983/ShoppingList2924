@@ -11,7 +11,8 @@
     <string name="day">Day</string>
     <string name="saturday">Sa</string>
     <string name="week">Week</string>
+    <string name="foods">All foods</string>
     <string name="sunday">Su</string>
     <string name="random">R -</string>
-    <string name="add">A+</string>
+    <string name="add_random">A/R</string>
 </resources>
