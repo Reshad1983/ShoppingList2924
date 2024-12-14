@@ -141,6 +141,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query, new String[]{name});
         db.close();
     }
+    public NameStatusPair find_item_from_db(String name) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT * FROM "  + TABLE_ITEMS + " WHERE " + COLUMN_NAME +" = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{name});
+        NameStatusPair item = null;
+        if(cursor.moveToFirst()){
+            //(String name, String status, String usage, String pos, String duration, String prio, String method_interval, String date)
+            do{
+                item = new NameStatusPair(
+                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_NAME)),
+                "0",
+                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_USAGE_COUNT)),
+                                cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_POS)),
+                                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DURATION)),
+                                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PRIORITY)),
+                                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_INTERVAL)),
+                                        cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_DATE)));
+            }while(cursor.moveToNext());
+        }
+            return item;
+    }
     public void update_date(String date , String name)
     {
         SQLiteDatabase db = this.getWritableDatabase();

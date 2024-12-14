@@ -6,9 +6,21 @@
     android:layout_height="match_parent">
 
 
+    <TextView
+        android:id="@+id/con_day_id"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="44dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/day"
+        app:layout_constraintEnd_toStartOf="@+id/snooze_id"
+        app:layout_constraintStart_toEndOf="@+id/con_search_id"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <EditText
         android:id="@+id/con_search_id"
-        android:layout_width="180dp"
+        android:layout_width="150dp"
         android:layout_height="40dp"
         android:background="@drawable/hole_view"
         android:ems="10"
@@ -19,19 +31,20 @@
         app:layout_constraintEnd_toStartOf="@+id/con_day_id"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/con_day_id"
-        app:layout_constraintVertical_bias="0.13999999" />
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
-        android:id="@+id/con_day_id"
+        android:id="@+id/snooze_id"
         android:layout_width="70dp"
         android:layout_height="40dp"
-        android:layout_marginTop="45dp"
         android:background="@drawable/hole_view"
         android:gravity="center"
-        android:text="@string/day"
+        android:text="@string/snooze"
         app:layout_constraintEnd_toStartOf="@+id/con_search_btn"
-        app:layout_constraintStart_toEndOf="@+id/con_search_id"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/con_day_id"
+        app:layout_constraintTop_toTopOf="@+id/con_search_btn"
+
+        />
 
     <TextView
         android:id="@+id/con_search_btn"
@@ -42,12 +55,13 @@
         android:text="@string/search"
         app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/con_day_id"
-        app:layout_constraintTop_toTopOf="@+id/con_day_id" />
+        app:layout_constraintStart_toEndOf="@+id/snooze_id"
+        app:layout_constraintTop_toTopOf="@+id/con_day_id"
+        app:layout_constraintVertical_bias="1.0" />
 
     <TextView
         android:id="@+id/con_sort"
-        android:layout_width="70dp"
+        android:layout_width="60dp"
         android:layout_height="45dp"
         android:layout_marginStart="8dp"
         android:background="@drawable/hole_view"

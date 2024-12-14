@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -36,6 +37,7 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
     TextView sd_num_view;
     TextView food_sum_view;
     TextView week_view;
+    TextView snooze_btn;
     TextView plus_btn;
     LinearLayout list_view;
     LinearLayout buy_list;
@@ -65,6 +67,7 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
         setContentView(R.layout.new_main_layout);
         handler = new Handler();
         list_view = findViewById(R.id.con_item_view);
+        snooze_btn = findViewById(R.id.snooze_id);
         buy_list = findViewById(R.id.con_item_view2);
         food_sum_view = findViewById(R.id.food_list_id);
         sdb = new DatabaseHelper(NewMainActivity.this);
@@ -105,6 +108,37 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
         seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
         eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
         nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
+        snooze_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                List<NameStatusPair> my_items = new ArrayList<>();
+                for(int i = 0; i < buy_list.getChildCount(); i++){
+                    View item_view = buy_list.getChildAt(i);
+                    CheckBox cb = item_view.findViewById(R.id.checkBox_id);
+                    TextView item_name = item_view.findViewById(R.id.con_item_id);
+                    TextView usaage_view = item_view.findViewById(R.id.con_usa_id);
+                    if(cb.isChecked()){
+                        Date date = new Date();
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                        String date_string = sdf.format(date);
+                        sdb.update_status(0, item_name.getText().toString());
+                        sdb.update_date(date_string, item_name.getText().toString());
+                        NameStatusPair item = sdb.find_item_from_db(item_name.getText().toString());
+                        my_items.add(item);
+                        buy_list.removeView(item_view);
+                        i--;
+                        View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                    }
+                }
+                if(my_items.size() > 0){
+                    add_items_to_view(my_items);
+                    Toast.makeText(NewMainActivity.this, "Item snoozed", Toast.LENGTH_LONG).show();
+                }
+                else{
+                    Toast.makeText(NewMainActivity.this, "No item selected to snooze!", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
         day_select.setOnClickListener(v -> {
             String selected_day_string = day_select.getText().toString();
             switch (selected_day_string) {
@@ -472,6 +506,7 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
 
     public void addItemToLayout(View itemView, NameStatusPair item){
         TextView item_name = itemView.findViewById(R.id.con_item_id);
+        CheckBox cb = itemView.findViewById(R.id.checkBox_id);
         TextView item_interval = itemView.findViewById(R.id.con_interval_id);
         TextView item_use = itemView.findViewById(R.id.con_usa_id);
         item_interval.setOnClickListener(v -> {
@@ -536,11 +571,11 @@ public class NewMainActivity extends AppCompatActivity implements View.OnClickLi
                 long difference = Math.abs(date.getTime() - lDate.getTime());
                 long differenceDates = difference / (24 * 60 * 60 * 1000);
                 sdb.update_date(date_string, item_name.getText().toString());
-                if((Integer.parseInt((item.get_interval()) + 2) < (int)differenceDates) ||
+/*                if((Integer.parseInt((item.get_interval()) + 2) < (int)differenceDates) ||
                         (((Integer.parseInt(item.get_interval()) - 2) > (int)differenceDates) )){
+                }*/
                     sdb.update_interval((int)differenceDates, item.getName());
                     item.set_interval((int)differenceDates + "");
-                }
                 item_interval.setText(date_string);
                 item.setStatus("0");
                 item.set_date(date_string);

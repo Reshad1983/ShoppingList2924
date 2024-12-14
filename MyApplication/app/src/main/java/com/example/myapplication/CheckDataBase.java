@@ -65,13 +65,13 @@ public class CheckDataBase extends Service {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String today_date = sdf.format(new Date());
                 String first_time_to_insert = myPre.getString(FIRST_DATE, "");
-           if(!today_date.equals(first_time_to_insert)){
+         if(!today_date.equals(first_time_to_insert)){
               SharedPreferences.Editor editor = myPre.edit();
               editor.putString(FIRST_DATE, today_date);
               editor.apply();
                sdf = new SimpleDateFormat("E");
                today_date = sdf.format(new Date());
-                if(today_date.equals("Fri")){
+                if((today_date.equals("fre")) || (today_date.equals("Fri"))){
                   for (NameStatusPair item : items) {
                       String date_string = item.get_date();
                       if (date_string != null) {
