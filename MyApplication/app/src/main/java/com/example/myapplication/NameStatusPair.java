@@ -11,6 +11,8 @@ public class NameStatusPair {
     private String prio;
     private String interval;
     private String date;
+    private String rare_item;
+
 
     public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio)
     {
@@ -20,6 +22,19 @@ public class NameStatusPair {
         this.pos = pos;
         this.duration = duration;
         this.prio = prio;
+    }
+
+    public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio, String method_interval, String date, String rare)
+    {
+        this.name = name;
+        this.status = status;
+        this.usage = usage;
+        this.pos = pos;
+        this.duration = duration;
+        this.prio = prio;
+        this.interval = method_interval;
+        this.date = date;
+        this.rare_item = rare;
     }
 
     public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio, String method_interval, String date)
@@ -37,6 +52,10 @@ public class NameStatusPair {
     public String getPrio()
     {
         return this.prio;
+    }
+    public String get_rare_item()
+    {
+        return this.rare_item;
     }
     public String getDuration()
     {

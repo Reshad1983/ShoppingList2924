@@ -56,11 +56,7 @@ public class CheckDataBase extends Service {
             @Override
             public void run() {
                 List<NameStatusPair> items;
-                try{
-                    items = dbh.getItemsSortedByUsage();
-                } catch (ParseException e){
-                    throw new RuntimeException(e);
-                }
+                items = dbh.getItemsSortedByUsageForBuyCheck();
                 StringBuilder message = prior_list( dbh, items);
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String today_date = sdf.format(new Date());
@@ -88,7 +84,7 @@ public class CheckDataBase extends Service {
                           sdf = new SimpleDateFormat("yyyy-MM-dd");
                           String buy_date_to_now = sdf.format(c.getTime());
                           today_date = sdf.format(new Date());
-                          if (today_date.compareTo(buy_date_to_now) > 0) {
+                          if (((today_date.compareTo(buy_date_to_now) > 0)) && (item.get_rare_item().equals("0"))) {
                               dbh.update_status(1, item.getName());
                               Log.d("Handlers", "Time to buy");
                               message.append("\n").append(item.getName());
@@ -117,7 +113,7 @@ public class CheckDataBase extends Service {
         return message;
     }
     private Notification showNotification(String content) {
-        Intent intent = new Intent(this, NewMainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
         ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).createNotificationChannel(

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.text.Editable;
+import android.widget.TextView;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -17,7 +18,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // Database Name and Version
     private static final String DATABASE_NAME = "items.db";
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
     // Table and Columns
     private static final String TABLE_ITEMS = "items";
     private static final String TABLE_FOOD = "food_recepies";
@@ -37,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_FOOD = "food_name";
     private static final String DAY_TO_COOK = "food_day";
     private static final String USED_LAST_WEEK = "used_last_week";
+    private static final String RARE_ITEM = "rare_item_to_buy";
 
 
 
@@ -58,11 +60,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // Drop older table if exists
         if(oldVersion < newVersion ) {
-
-            String CREATE_ITEMS_TABLE = "ALTER TABLE " + TABLE_FOOD + " ADD " +
-                    USED_LAST_WEEK + " INTEGER ";
+            String CREATE_ITEMS_TABLE = "ALTER TABLE " + TABLE_ITEMS + " ADD " +
+                    RARE_ITEM + " INTEGER ";
             db.execSQL(CREATE_ITEMS_TABLE);
-
         }
         else {
 
@@ -120,6 +120,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_STATUS + " = \"0\"" ;
+        db.execSQL(query);
+        db.close();
+    }
+
+    public void reset_rare_items()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + RARE_ITEM + " = \"0\"" ;
         db.execSQL(query);
         db.close();
     }
@@ -435,4 +443,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
+    public void set_as_rare_item(String itemName) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + RARE_ITEM + " = \" 1\" WHERE " + COLUMN_NAME + " = ?";
+        db.execSQL(query, new String[]{itemName});
+        db.close();
+    }
+
+    public List<NameStatusPair> getItemsSortedByUsageForBuyCheck() {
+        List<NameStatusPair> itemList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE, RARE_ITEM},
+                null, null, null, null, COLUMN_PRIORITY + " ASC, " + COLUMN_STATUS + " ASC, "+ COLUMN_POS + " ASC");//, "+COLUMN_USAGE_COUNT+" DESC");
+
+        if (cursor.moveToFirst()) {
+            do {
+                String itemName = cursor.getString(0);
+                String itemUsage = cursor.getString(1);
+                String item_status = cursor.getString(2);
+                String item_pos = cursor.getString(3);
+                String item_duration = cursor.getString(4);
+                String item_prio = cursor.getString((5));
+                String interval = cursor.getString((6));
+                String date_string = cursor.getString((7));
+                String rare_item = cursor.getString((8));
+               /*if(date_string != null && date_string.contains("d"))
+                {
+                    date_string = null;
+                }
+                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
+                Date date;
+                if(date_string != null && (date_string.length() > 4))
+                {
+                    date = sfd.parse(date_string);
+                }
+                else
+                {
+
+                    date = null;
+                }*/
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date_string, rare_item));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return itemList;
+    }
 }
