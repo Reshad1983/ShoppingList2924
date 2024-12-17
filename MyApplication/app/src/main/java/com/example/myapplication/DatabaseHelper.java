@@ -195,7 +195,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<NameStatusPair> getItemsSortedByUsage() throws ParseException {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE},
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS,
+                        COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE, RARE_ITEM},
                 null, null, null, null, COLUMN_PRIORITY + " ASC, " + COLUMN_STATUS + " ASC, "+ COLUMN_USAGE_COUNT + " ASC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
@@ -208,22 +209,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String item_prio = cursor.getString((5));
                 String interval = cursor.getString((6));
                 String date_string = cursor.getString((7));
-                if(date_string != null && date_string.contains("d"))
-                {
+                String rare_item = cursor.getString((8));
+                if(date_string != null && date_string.contains("d")) {
                     date_string = null;
                 }
                 SimpleDateFormat sfd = new SimpleDateFormat("yy-MM-dd");
-                /* Date date;
-                if(date_string != null && (date_string.length() > 4))
-                {
-                    date = sfd.parse(date_string);
-                }
-                else
-                {
-
-                    date = null;
-                }*/
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date_string));
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration,
+                        item_prio, interval, date_string, rare_item));
             } while (cursor.moveToNext());
         }
 
@@ -234,7 +226,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<NameStatusPair> getItemsSortedByPosition() throws ParseException {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE},
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS,
+                        COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE, RARE_ITEM},
                 null, null, null, null, COLUMN_PRIORITY + " ASC, " + COLUMN_STATUS + " ASC, "+ COLUMN_POS + " ASC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
@@ -247,22 +240,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String item_prio = cursor.getString((5));
                 String interval = cursor.getString((6));
                 String date_string = cursor.getString((7));
-               /*if(date_string != null && date_string.contains("d"))
-                {
-                    date_string = null;
-                }
-                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
-                Date date;
-                if(date_string != null && (date_string.length() > 4))
-                {
-                    date = sfd.parse(date_string);
-                }
-                else
-                {
-
-                    date = null;
-                }*/
-                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date_string));
+                String rare_item = cursor.getString((8));
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos,
+                        item_duration, item_prio, interval, date_string, rare_item));
             } while (cursor.moveToNext());
         }
 
@@ -270,29 +250,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return itemList;
     }
-
-    public void set_priority(String name, int i)
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_PRIORITY + " = \"" + i + "\" WHERE " + COLUMN_NAME + " = ?";
-        db.execSQL(query, new String[]{name});
-        db.close();
-    }
-
     public void update_interval(int i, String name) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_INTERVAL + " = " + i + " WHERE " + COLUMN_NAME + " = ?";
         db.execSQL(query, new String[]{name});
         db.close();
     }
-
-    public void update_all_date(String date) {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_DATE + " = \"" + date + "\"";
-        db.execSQL(query);
-        db.close();
-    }
-
     public int get_number_of_foods() {
         SQLiteDatabase db = this.getReadableDatabase();
         String query = "SELECT COUNT(*) FROM " + TABLE_FOOD;
@@ -388,8 +351,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String food_ingred = "";
         String query = "Select " + COLUMN_INGREDIENTS + " FROM " + TABLE_FOOD + " Where " + COLUMN_NAME + "=?";
         Cursor cursor = db.rawQuery(query, new String[]{string});
-        if(cursor.moveToFirst())
-        {
+        if(cursor.moveToFirst()) {
             do {
                 food_ingred = cursor.getString(0);
             }while(cursor.moveToNext());
@@ -443,9 +405,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void set_as_rare_item(String itemName) {
+    public void set_as_rare_item(String itemName, String rare) {
         SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_ITEMS + " SET " + RARE_ITEM + " = \" 1\" WHERE " + COLUMN_NAME + " = ?";
+        String query = "UPDATE " + TABLE_ITEMS + " SET " + RARE_ITEM + " = \"" + rare + "\" WHERE " + COLUMN_NAME + " = ?";
         db.execSQL(query, new String[]{itemName});
         db.close();
     }
@@ -453,7 +415,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public List<NameStatusPair> getItemsSortedByUsageForBuyCheck() {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE, RARE_ITEM},
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS,
+                        COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE, RARE_ITEM},
                 null, null, null, null, COLUMN_PRIORITY + " ASC, " + COLUMN_STATUS + " ASC, "+ COLUMN_POS + " ASC");//, "+COLUMN_USAGE_COUNT+" DESC");
 
         if (cursor.moveToFirst()) {
@@ -467,22 +430,42 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 String interval = cursor.getString((6));
                 String date_string = cursor.getString((7));
                 String rare_item = cursor.getString((8));
-               /*if(date_string != null && date_string.contains("d"))
-                {
-                    date_string = null;
-                }
-                SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
-                Date date;
-                if(date_string != null && (date_string.length() > 4))
-                {
-                    date = sfd.parse(date_string);
-                }
-                else
-                {
-
-                    date = null;
-                }*/
                 itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos, item_duration, item_prio, interval, date_string, rare_item));
+            } while (cursor.moveToNext());
+        }
+
+        cursor.close();
+        db.close();
+        return itemList;
+    }
+
+    public List<NameStatusPair> sort_buy_list(String pos) {
+        List<NameStatusPair> itemList = new ArrayList<>();
+        String arg = null;
+        if(pos.equals("-1")){
+            arg = COLUMN_STATUS +" = \"1\"";
+        }
+        else{
+            arg = COLUMN_STATUS +" = \"1\" AND " + COLUMN_POS + " = \""+pos+"\"";
+        }
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS,
+                        COLUMN_POS, COLUMN_DURATION, COLUMN_PRIORITY, COLUMN_INTERVAL, COLUMN_DATE, RARE_ITEM},
+                arg, null, null, null,  COLUMN_POS + " DESC");
+
+        if (cursor.moveToFirst()) {
+            do {
+                String itemName = cursor.getString(0);
+                String itemUsage = cursor.getString(1);
+                String item_status = cursor.getString(2);
+                String item_pos = cursor.getString(3);
+                String item_duration = cursor.getString(4);
+                String item_prio = cursor.getString((5));
+                String interval = cursor.getString((6));
+                String date_string = cursor.getString((7));
+                String rare_item = cursor.getString((8));
+                itemList.add(new NameStatusPair(itemName, item_status, itemUsage, item_pos,
+                        item_duration, item_prio, interval, date_string, rare_item));
             } while (cursor.moveToNext());
         }
 

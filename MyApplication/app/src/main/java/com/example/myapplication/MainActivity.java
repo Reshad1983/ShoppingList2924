@@ -286,11 +286,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             if (search_text.isEmpty()) {
                 sc_view.fullScroll(ScrollView.FOCUS_UP);
                 try {
-                    items = sdb.getItemsSortedByPosition();
+                    items = sdb.getItemsSortedByUsage();
                 } catch (ParseException e) {
                     throw new RuntimeException(e);
                 }
                 add_items_to_view(items);
+                sort_list_view("-1");
                 search_item.setHint("SAR");
                 found = 1;
             }  else if ((search_text.trim().length() == 1) && (Integer.parseInt(search_text) < 10) && (Integer.parseInt(search_text) > 0)) {
@@ -342,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         sd_num_view.setOnClickListener(v -> {
             reset_btn_color();
-            list_view.removeAllViews();
+            refresh();
             List<NameStatusPair> items1;
             if (sorting) {
                 try
@@ -363,7 +364,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             sorting = !sorting;
         });
         add_items_to_view(items);
+        sort_list_view("-1");
         startForegroundService(new Intent(this, CheckDataBase.class));
+    }
+
+    private void sort_list_view(String pos) {
+        buy_list.removeAllViews();
+        List<NameStatusPair> list = sdb.sort_buy_list(pos);
+        add_items_to_view(list);
+
     }
     //----------------------------------------------------------------------------------------------------------
 
@@ -412,35 +421,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void add_food_name_to_layout(View foodView, String item, int i) {
         TextView item_name = foodView.findViewById(R.id.food_name_id);
         TextView add_ingredient = foodView.findViewById(R.id.food_ingredients_id);
-        add_ingredient.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                List<NameStatusPair> items_to_check_status;
-                try {
-                    items_to_check_status = sdb.getItemsSortedByPosition();
-                } catch (ParseException e) {
-                    throw new RuntimeException(e);
-                }
-                StringBuilder new_ingredients = new StringBuilder();
-                for(NameStatusPair item : items_to_check_status){
-                    if(item.getStatus().equals("1")){
-                        if(new_ingredients.length() == 0){
-                            new_ingredients.append(item.getName());
-                        }
-                        else{
-                            new_ingredients.append("-").append(item.getName());
-                        }
+        add_ingredient.setOnLongClickListener(v -> {
+            List<NameStatusPair> items_to_check_status;
+            try {
+                items_to_check_status = sdb.getItemsSortedByPosition();
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
+            StringBuilder new_ingredients = new StringBuilder();
+            for(NameStatusPair item1 : items_to_check_status){
+                if(item1.getStatus().equals("1")){
+                    if(new_ingredients.length() == 0){
+                        new_ingredients.append(item1.getName());
+                    }
+                    else{
+                        new_ingredients.append("-").append(item1.getName());
                     }
                 }
-                sdb.add_ingredients_to_food(item_name.getText().toString(), new_ingredients.toString());
-                refresh();
-                List<FoodDay> food_list = sdb.get_food_names();
-                List<String> food_name_list = new ArrayList<>();
-                for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
-                add_food_to_view(food_name_list);
-                Toast.makeText(MainActivity.this, "New ingredients added!", Toast.LENGTH_LONG).show();
-                return false;
             }
+            sdb.add_ingredients_to_food(item_name.getText().toString(), new_ingredients.toString());
+            refresh();
+            List<FoodDay> food_list = sdb.get_food_names();
+            List<String> food_name_list = new ArrayList<>();
+            for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
+            add_food_to_view(food_name_list);
+            Toast.makeText(MainActivity.this, "New ingredients added!", Toast.LENGTH_LONG).show();
+            return false;
         });
         item_name.setText(item);
         item_name.setOnClickListener(v -> {
@@ -457,19 +463,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             },800);
 
         });
-        item_name.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
-                String[]ingredients = day_food.split("-");
-                for (String ingredient : ingredients) {
-                    if(!ingredient.isEmpty()){
-                       sdb.update_status(1, ingredient);
-                    }
+        item_name.setOnLongClickListener(v -> {
+            String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
+            String[]ingredients = day_food.split("-");
+            for (String ingredient : ingredients) {
+                if(!ingredient.isEmpty()){
+                   sdb.update_status(1, ingredient);
                 }
-                Toast.makeText(MainActivity.this, "Ingredients are unchecked!", Toast.LENGTH_LONG).show();
-                return false;
             }
+            Toast.makeText(MainActivity.this, "Ingredients are unchecked!", Toast.LENGTH_LONG).show();
+            return false;
         });
         String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
             String[]ingredients = day_food.split("-");
@@ -505,8 +508,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView item_use = itemView.findViewById(R.id.con_usa_id);
         item_interval.setOnClickListener(v -> {
             if(!search_item.getText().toString().isEmpty()){
-                if(is_a_number(search_item.getText().toString()))
-                {
+                if(is_a_number(search_item.getText().toString())) {
                     sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());
                     item.set_interval(search_item.getText().toString());
                     item_interval.setTextColor(Color.BLACK);
@@ -518,16 +520,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         item_name.setOnLongClickListener(v -> {
-            if(!search_item.getText().toString().isEmpty())
-            {
+            if(!search_item.getText().toString().isEmpty()){
                 String new_name = search_item.getText().toString();
                 sdb.update_item_name(new_name , item.getName());
                 item.set_name(new_name);
                 Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
                 item_name.setText(item.getName());
             }
-            else
-            {
+            else{
 
                 sdb.removeItem(item_name.getText().toString());
                 list_view.removeView(itemView);
@@ -542,8 +542,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item.setStatus("1");
                 item.set_prio(""+ list_view.indexOfChild(itemView));
                 list_view.removeView(itemView);
-                View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
-                addItemToLayout(mitemView, item);
+                sort_list_view(item.getPos());
             }
             else if(item.getStatus().equals("1")){
                 Date date = new Date();
@@ -606,31 +605,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
 
         });
-            item_interval.setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    String date_string = sdf.format(date);
-                    sdb.update_status(0, item.getName());
-                    sdb.update_date(date_string, item_name.getText().toString());
-                    Toast.makeText(MainActivity.this, "Item snoozed", Toast.LENGTH_LONG).show();
-                    item.setStatus("0");
-                    item.set_date(date_string);
-                    buy_list.removeView(itemView);
-                    View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
-                    addItemToLayout(mitemView, item);
-                    return false;
-                }
+            item_interval.setOnLongClickListener(v -> {
+                Date date = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                String date_string = sdf.format(date);
+                sdb.update_status(0, item.getName());
+                sdb.update_date(date_string, item_name.getText().toString());
+                Toast.makeText(MainActivity.this, "Item snoozed", Toast.LENGTH_LONG).show();
+                item.setStatus("0");
+                item.set_date(date_string);
+                buy_list.removeView(itemView);
+                View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                addItemToLayout(mitemView, item);
+                return false;
             });
         item_use.setTextColor(Color.BLACK);
         item_use.setText(item.getUsage());
-        item_use.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        String rare_buy_item = item.get_rare_item();
+        if(rare_buy_item == null){
+            item.set_as_rare("0");
+            item_use.setBackgroundResource(R.drawable.bordered_transparent);
+        }
+        else if(item.get_rare_item().equals("1")){
+            item_use.setBackgroundResource(R.drawable.unchecked);
+        }
+        item_use.setOnClickListener(v -> {
+            if(item.get_rare_item().equals("0") ){
                 item_use.setBackgroundResource(R.drawable.unchecked);
-                sdb.set_as_rare_item(item_name.getText().toString());
+                sdb.set_as_rare_item(item.getName(), "1");
+                item.set_as_rare("1");
                 Toast.makeText(MainActivity.this, "Rare item", Toast.LENGTH_SHORT).show();
+            }
+            else{
+                item_use.setBackgroundResource(R.drawable.bordered_transparent);
+                sdb.set_as_rare_item(item.getName(), "0");
+                item.set_as_rare("0");
+                Toast.makeText(MainActivity.this, "Removed rare item", Toast.LENGTH_SHORT).show();
             }
         });
         switch (item.getStatus()) {

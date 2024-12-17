@@ -13,17 +13,6 @@ public class NameStatusPair {
     private String date;
     private String rare_item;
 
-
-    public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio)
-    {
-        this.name = name;
-        this.status = status;
-        this.usage = usage;
-        this.pos = pos;
-        this.duration = duration;
-        this.prio = prio;
-    }
-
     public NameStatusPair(String name, String status, String usage, String pos, String duration, String prio, String method_interval, String date, String rare)
     {
         this.name = name;
@@ -96,6 +85,10 @@ public class NameStatusPair {
     public void set_name(String name)
     {
         this.name = name;
+    }
+    public void set_as_rare(String rare)
+    {
+        this.rare_item = rare;
     }
     public void set_interval(String interval){this.interval = interval;}
     public void set_prio(String prio){this.prio = prio;}
