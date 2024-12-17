@@ -192,7 +192,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
 
     }  // Get items sorted by most used (descending order of usage_count)
-    public List<NameStatusPair> getItemsSortedByUsage() throws ParseException {
+    public List<NameStatusPair> getItemsSortedByUsage() {
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS, COLUMN_POS,
@@ -223,7 +223,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return itemList;
     }
-    public List<NameStatusPair> getItemsSortedByPosition() throws ParseException {
+    public List<NameStatusPair> getItemsSortedByPosition(){
         List<NameStatusPair> itemList = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.query(TABLE_ITEMS, new String[]{COLUMN_NAME, COLUMN_USAGE_COUNT, COLUMN_STATUS,
