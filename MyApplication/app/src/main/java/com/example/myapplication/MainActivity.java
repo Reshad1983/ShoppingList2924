@@ -56,56 +56,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     int num_of_days = 7;
     private StringBuilder list_of_ingredients;
     private TextView global_food_view;
+    private TextView search_btn;
     private List<String> day_food_to_show;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.new_main_layout);
-        handler = new Handler();
-        list_view = findViewById(R.id.con_item_view);
-        snooze_btn = findViewById(R.id.snooze_id);
-        buy_list = findViewById(R.id.con_item_view2);
-        food_sum_view = findViewById(R.id.food_list_id);
-        sdb = new DatabaseHelper(MainActivity.this);
-        //sdb.reset_rare_items();
-        search_item = findViewById(R.id.con_search_id);
-        sc_view = findViewById(R.id.con_sc_id);
-        TextView search_btn = findViewById(R.id.con_search_btn);
-        day_select = findViewById(R.id.con_day_id);
-
-        sd_num_view = findViewById(R.id.con_sort);
-        plus_btn = findViewById(R.id.con_plus_id);
-        week_view = findViewById(R.id.con_sun_id);
-        day_select.setOnLongClickListener(this);
-        week_view.setOnClickListener(this);
-        day_food_to_show = new ArrayList<>();
-        day_food_to_show.add("Mo");
-        day_food_to_show.add("Tu");
-        day_food_to_show.add("We");
-        day_food_to_show.add("Th");
-        day_food_to_show.add("Fr");
-        day_food_to_show.add("Sa");
-        day_food_to_show.add("Su");
-        one_btn = findViewById(R.id.one_con_id);
-        two_btn = findViewById(R.id.two_con_id);
-        three_btn = findViewById(R.id.three_con_id);
-        four_btn = findViewById(R.id.four_con_id);
-        five_btn = findViewById(R.id.five_con_id);
-        six_btn = findViewById(R.id.six_con_id);
-        seven_btn = findViewById(R.id.seven_con_id);
-        eight_btn = findViewById(R.id.eight_con_id);
-        list_of_ingredients = new StringBuilder();
-        nine_btn = findViewById(R.id.nine_con_id);
-        one_btn.setOnClickListener(this);
-        two_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.two_id);
-        three_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.three_id);
-        four_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.four_id);
-        five_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.five_id);
-        six_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.six_id);
-        seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
-        eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
-        nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
+        initialize();
         snooze_btn.setOnClickListener(v -> {
             List<NameStatusPair> my_items = new ArrayList<>();
             for(int i = 0; i < buy_list.getChildCount(); i++){
@@ -785,5 +743,51 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         list_view.removeAllViews();
         show_days_meal();
         Toast.makeText(MainActivity.this, "Random food is chosen!", Toast.LENGTH_LONG).show();
+    }
+    private void initialize(){
+        handler = new Handler();
+        list_view = findViewById(R.id.con_item_view);
+        snooze_btn = findViewById(R.id.snooze_id);
+        buy_list = findViewById(R.id.con_item_view2);
+        food_sum_view = findViewById(R.id.food_list_id);
+        sdb = new DatabaseHelper(MainActivity.this);
+        //sdb.reset_rare_items();
+        search_item = findViewById(R.id.con_search_id);
+        sc_view = findViewById(R.id.con_sc_id);
+        search_btn = findViewById(R.id.con_search_btn);
+        day_select = findViewById(R.id.con_day_id);
+
+        sd_num_view = findViewById(R.id.con_sort);
+        plus_btn = findViewById(R.id.con_plus_id);
+        week_view = findViewById(R.id.con_sun_id);
+        day_select.setOnLongClickListener(this);
+        week_view.setOnClickListener(this);
+        day_food_to_show = new ArrayList<>();
+        day_food_to_show.add("Mo");
+        day_food_to_show.add("Tu");
+        day_food_to_show.add("We");
+        day_food_to_show.add("Th");
+        day_food_to_show.add("Fr");
+        day_food_to_show.add("Sa");
+        day_food_to_show.add("Su");
+        one_btn = findViewById(R.id.one_con_id);
+        two_btn = findViewById(R.id.two_con_id);
+        three_btn = findViewById(R.id.three_con_id);
+        four_btn = findViewById(R.id.four_con_id);
+        five_btn = findViewById(R.id.five_con_id);
+        six_btn = findViewById(R.id.six_con_id);
+        seven_btn = findViewById(R.id.seven_con_id);
+        eight_btn = findViewById(R.id.eight_con_id);
+        list_of_ingredients = new StringBuilder();
+        nine_btn = findViewById(R.id.nine_con_id);
+        one_btn.setOnClickListener(this);
+        two_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.two_id);
+        three_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.three_id);
+        four_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.four_id);
+        five_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.five_id);
+        six_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.six_id);
+        seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
+        eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
+        nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
     }
 }
