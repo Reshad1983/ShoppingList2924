@@ -244,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
                     addItemToLayout(mitemView, item);
                 }, 500);
+                Toast.makeText(MainActivity.this, "Usage updated!", Toast.LENGTH_SHORT).show();
             }
             else{
 
