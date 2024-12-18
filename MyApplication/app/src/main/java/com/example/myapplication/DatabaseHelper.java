@@ -5,10 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.text.Editable;
-import android.widget.TextView;
-
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -131,16 +127,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query);
         db.close();
     }
-
-
-    public void reset_usage(String name, String usage)
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_USAGE_COUNT + " = \"0\"  WHERE " +COLUMN_NAME + " = ?" ;
-        db.execSQL(query, new String []{name} );
-        db.execSQL(query);
-        db.close();
-    }
     public void update_status(int status, String name)
     {
         String string_status = ""+status;
@@ -184,8 +170,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query, new String[]{name});
         db.close();
     }
-    public void update_item_name(String new_name, String old_name)
-    {
+    public void update_item_name(String new_name, String old_name) {
         SQLiteDatabase db = this.getWritableDatabase();
         String query = "UPDATE " + TABLE_ITEMS + " SET " + COLUMN_NAME + " = \"" + new_name + "\" WHERE " + COLUMN_NAME + " = ?";
         db.execSQL(query, new String[]{old_name});

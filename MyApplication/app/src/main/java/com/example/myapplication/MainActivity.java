@@ -228,6 +228,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
                 item_name.setText(item.getName());
             }
+            else if(item.getStatus().equals("1")){
+                sdb.increment_usage_count(item.getName());
+                sdb.update_status(0, item.getName());
+                item.setStatus("0");
+                int usage = Integer.parseInt(item.getUsage()) + 1;
+                item.setUsage(usage + "" );
+                handler = new Handler();
+                handler.postDelayed(() -> {
+                    itemView.setBackgroundResource(R.drawable.bordered_transparent);
+                    if(itemView.getParent() != null){
+                        ((ViewGroup)itemView.getParent()).removeView(itemView);
+                    }
+                    buy_list.removeView(itemView);
+                    View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                    addItemToLayout(mitemView, item);
+                }, 500);
+            }
             else{
 
                 sdb.removeItem(item_name.getText().toString());
