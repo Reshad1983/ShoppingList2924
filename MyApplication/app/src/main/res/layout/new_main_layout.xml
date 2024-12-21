@@ -1,175 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
-    <LinearLayout
+    android:layout_height="match_parent">
+
+
+    <TextView
+        android:id="@+id/con_day_id"
+        android:layout_width="50dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="44dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/day"
+        app:layout_constraintEnd_toStartOf="@+id/snooze_id"
+        app:layout_constraintStart_toEndOf="@+id/con_search_id"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <EditText
+        android:id="@+id/con_search_id"
+        android:layout_width="150dp"
+        android:layout_height="40dp"
+        android:background="@drawable/hole_view"
+        android:ems="10"
+        android:gravity="center"
+        android:hint="@string/search"
+        android:inputType="text"
+        app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
+        app:layout_constraintEnd_toStartOf="@+id/con_day_id"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/con_day_id"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/snooze_id"
+        android:layout_width="70dp"
+        android:layout_height="40dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/snooze"
+        app:layout_constraintEnd_toStartOf="@+id/con_search_btn"
+        app:layout_constraintStart_toEndOf="@+id/con_day_id"
+        app:layout_constraintTop_toTopOf="@+id/con_search_btn"
+
+        />
+
+    <TextView
+        android:id="@+id/con_search_btn"
+        android:layout_width="80dp"
+        android:layout_height="40dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/search"
+        app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/snooze_id"
+        app:layout_constraintTop_toTopOf="@+id/con_day_id"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/con_sort"
+        android:layout_width="60dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:scaleType="centerCrop"
+        android:text="@string/Sort"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/con_plus_id" />
+
+    <TextView
+        android:id="@+id/one_con_id"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:orientation="horizontal">
-        <EditText
-            android:id="@+id/con_search_id"
-            android:layout_width="150dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="16dp"
-            android:autofillHints=""
-            android:background="@drawable/hole_view"
-            android:ems="10"
-            android:gravity="center"
-            android:hint="@string/search"
-            android:inputType="text"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+        android:layout_height="57dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="1"
+        app:layout_constraintStart_toStartOf="@+id/con_sort"
+        app:layout_constraintTop_toBottomOf="@+id/con_sort" />
 
-        <TextView
-            android:id="@+id/food_main_menu_id"
-            android:layout_width="70dp"
-            android:layout_height="40dp"
-            android:layout_marginStart="16dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:text="@string/food_main"
-            app:layout_constraintStart_toEndOf="@+id/con_search_id"
-            app:layout_constraintTop_toTopOf="@+id/con_search_id" />
-
-        <TextView
-            android:id="@+id/con_search_btn"
-            android:layout_width="80dp"
-            android:layout_height="40dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:layout_marginStart="16dp"
-            android:text="@string/search"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/food_main_menu_id"
-            app:layout_constraintTop_toTopOf="@+id/con_search_id" />
-
-
-    </LinearLayout>
-    <LinearLayout
+    <TextView
+        android:id="@+id/two_con_id"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:orientation="horizontal">
+        android:layout_height="53dp"
+        android:layout_marginTop="11dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="2"
+        app:layout_constraintStart_toStartOf="@+id/one_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/one_con_id" />
 
-    </LinearLayout>
-    <LinearLayout
+    <TextView
+        android:id="@+id/three_con_id"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
-        <TextView
+        android:layout_height="50dp"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="3"
+        app:layout_constraintStart_toStartOf="@+id/two_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/two_con_id" />
 
-            android:id="@+id/one_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="57dp"
-            android:layout_marginStart="4dp"
-            android:layout_marginTop="10dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="1"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
+    <TextView
+        android:id="@+id/four_con_id"
+        android:layout_width="wrap_content"
+        android:layout_height="47dp"
+        android:layout_marginTop="13dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="4"
+        app:layout_constraintStart_toStartOf="@+id/three_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/three_con_id" />
 
-        <TextView
-            android:id="@+id/two_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="53dp"
-            android:layout_marginTop="11dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="2"
-            app:layout_constraintStart_toStartOf="@+id/one_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/one_con_id" />
+    <TextView
+        android:id="@+id/five_con_id"
+        android:layout_width="wrap_content"
+        android:layout_height="44dp"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="5"
+        app:layout_constraintStart_toStartOf="@+id/four_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/four_con_id" />
 
-        <TextView
-            android:id="@+id/three_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="50dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="3"
-            app:layout_constraintStart_toStartOf="@+id/two_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/two_con_id" />
+    <TextView
+        android:id="@+id/six_con_id"
+        android:layout_width="wrap_content"
+        android:layout_height="41dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="6"
+        app:layout_constraintStart_toStartOf="@+id/five_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/five_con_id" />
 
-        <TextView
-            android:id="@+id/four_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="47dp"
-            android:layout_marginTop="13dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="4"
-            app:layout_constraintStart_toStartOf="@+id/three_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/three_con_id" />
+    <TextView
+        android:id="@+id/seven_con_id"
+        android:layout_width="wrap_content"
+        android:layout_height="38dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="7"
+        app:layout_constraintStart_toStartOf="@+id/six_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/six_con_id" />
 
-        <TextView
-            android:id="@+id/five_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:layout_marginTop="14dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="5"
-            app:layout_constraintStart_toStartOf="@+id/four_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/four_con_id" />
+    <TextView
+        android:id="@+id/eight_con_id"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="17dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="8"
+        app:layout_constraintStart_toStartOf="@+id/seven_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/seven_con_id" />
 
-        <TextView
-            android:id="@+id/six_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="41dp"
-            android:layout_marginTop="15dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="6"
-            app:layout_constraintStart_toStartOf="@+id/five_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/five_con_id" />
+    <TextView
+        android:id="@+id/nine_con_id"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginTop="18dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:padding="3dp"
+        android:text="9"
+        app:layout_constraintStart_toStartOf="@+id/eight_con_id"
+        app:layout_constraintTop_toBottomOf="@+id/eight_con_id" />
 
-        <TextView
-            android:id="@+id/seven_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="38dp"
-            android:layout_marginTop="16dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="7"
-            app:layout_constraintStart_toStartOf="@+id/six_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/six_con_id" />
+    <TextView
+        android:id="@+id/con_plus_id"
+        android:layout_width="70dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="25dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/add_random"
+        android:textSize="12sp"
+        app:layout_constraintStart_toEndOf="@+id/con_sort"
+        app:layout_constraintTop_toTopOf="@+id/con_sun_id" />
 
-        <TextView
-            android:id="@+id/eight_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginTop="17dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="8"
-            app:layout_constraintStart_toStartOf="@+id/seven_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/seven_con_id" />
+    <TextView
+        android:id="@+id/con_sun_id"
+        android:layout_width="70dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/week"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toStartOf="@+id/food_list_id"
+        app:layout_constraintStart_toEndOf="@+id/con_plus_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_day_id" />
 
-        <TextView
-            android:id="@+id/nine_con_id"
-            android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:layout_marginTop="18dp"
-            android:background="@drawable/hole_view"
-            android:gravity="center"
-            android:padding="3dp"
-            android:text="9"
-            app:layout_constraintStart_toStartOf="@+id/eight_con_id"
-            app:layout_constraintTop_toBottomOf="@+id/eight_con_id" />
-    </LinearLayout>
-
+    <TextView
+        android:id="@+id/food_list_id"
+        android:layout_width="70dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/foods"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="@+id/con_search_btn"
+        app:layout_constraintStart_toEndOf="@+id/con_sun_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
 
     <ScrollView
         android:id="@+id/con_sc_id"
@@ -218,4 +267,4 @@
             app:layout_constraintTop_toTopOf="@+id/one_con_id2" />
     </ScrollView>
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
