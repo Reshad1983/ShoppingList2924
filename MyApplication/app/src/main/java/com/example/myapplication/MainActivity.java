@@ -439,7 +439,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
             add_food_to_view(food_name_list);
             handler.postDelayed(() -> food_sum_view.setBackgroundResource(R.drawable.hole_view), 300);
-        } else if (btn_id == R.id.food_main_id) {
+        } else if (btn_id == R.id.con_day_id) {
             String selected_day_string = day_select.getText().toString();
             switch (selected_day_string) {
                 case "Day":
@@ -714,7 +714,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         search_item = findViewById(R.id.con_search_id);
         sc_view = findViewById(R.id.con_sc_id);
         search_btn = findViewById(R.id.con_search_btn);
-        day_select = findViewById(R.id.food_main_id);
+        day_select = findViewById(R.id.con_day_id);
         sd_num_view = findViewById(R.id.con_sort);
         plus_btn = findViewById(R.id.con_plus_id);
         week_view = findViewById(R.id.con_sun_id);
