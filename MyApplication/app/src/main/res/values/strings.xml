@@ -2,7 +2,7 @@
     <string name="app_name">Shopping list</string>
     <string name="search">SAR</string>
     <string name="food">Food name</string>
-    <string name="Sort">S</string>
+    <string name="Sort">Sort</string>
     <string name="monday">Mo</string>
     <string name="tuesday">Tu</string>
     <string name="wednesday">We</string>
@@ -12,8 +12,13 @@
     <string name="saturday">Sa</string>
     <string name="week">Week</string>
     <string name="snooze">Snooze</string>
+    <string name="reset">Reset status</string>
+    <string name="check_all">Check all</string>
+    <string name="increase_usage">Increase usage</string>
     <string name="foods">All foods</string>
     <string name="sunday">Su</string>
+    <string name="food_main">Food</string>
+
     <string name="random">R -</string>
     <string name="add_random">A/R</string>
 </resources>
