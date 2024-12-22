@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -9,41 +8,51 @@
     <TextView
         android:id="@+id/con_day_id"
         android:layout_width="50dp"
-        android:layout_height="40dp"
-        android:layout_marginTop="44dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="8dp"
         android:background="@drawable/hole_view"
         android:gravity="center"
         android:text="@string/day"
-        app:layout_constraintEnd_toStartOf="@+id/snooze_id"
-        app:layout_constraintStart_toEndOf="@+id/con_search_id"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/food_list_id"
+        app:layout_constraintTop_toTopOf="@+id/food_list_id" />
 
     <EditText
         android:id="@+id/con_search_id"
         android:layout_width="150dp"
         android:layout_height="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="50dp"
         android:background="@drawable/hole_view"
         android:ems="10"
         android:gravity="center"
         android:hint="@string/search"
         android:inputType="text"
-        app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
-        app:layout_constraintEnd_toStartOf="@+id/con_day_id"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/con_day_id"
-        app:layout_constraintVertical_bias="1.0" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÅabcdefghijklmnopqrstuvwxyzåöä "/>
 
+
+    <Spinner
+        android:id="@+id/spinner_id"
+        android:layout_width="45dp"
+        android:layout_height="40dp"
+        android:background="@drawable/hole_view"
+        android:gravity="center"
+        android:text="@string/add_use"
+        app:layout_constraintEnd_toStartOf="@+id/snooze_id"
+        app:layout_constraintStart_toEndOf="@+id/con_search_id"
+        app:layout_constraintTop_toTopOf="@+id/con_search_id"
+        />
     <TextView
         android:id="@+id/snooze_id"
-        android:layout_width="70dp"
+        android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:background="@drawable/hole_view"
         android:gravity="center"
         android:text="@string/snooze"
+        app:layout_constraintStart_toEndOf="@+id/spinner_id"
         app:layout_constraintEnd_toStartOf="@+id/con_search_btn"
-        app:layout_constraintStart_toEndOf="@+id/con_day_id"
-        app:layout_constraintTop_toTopOf="@+id/con_search_btn"
-
+        app:layout_constraintTop_toTopOf="@+id/con_search_id"
         />
 
     <TextView
@@ -53,35 +62,23 @@
         android:background="@drawable/hole_view"
         android:gravity="center"
         android:text="@string/search"
-        app:layout_constraintBottom_toBottomOf="@+id/con_day_id"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/snooze_id"
-        app:layout_constraintTop_toTopOf="@+id/con_day_id"
+        app:layout_constraintTop_toTopOf="@+id/con_search_id"
         app:layout_constraintVertical_bias="1.0" />
-
-    <TextView
-        android:id="@+id/con_sort"
-        android:layout_width="60dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="8dp"
-        android:background="@drawable/hole_view"
-        android:gravity="center"
-        android:scaleType="centerCrop"
-        android:text="@string/Sort"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/con_plus_id" />
 
     <TextView
         android:id="@+id/one_con_id"
         android:layout_width="wrap_content"
         android:layout_height="57dp"
-        android:layout_marginTop="10dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
         android:background="@drawable/hole_view"
         android:gravity="center"
         android:padding="3dp"
         android:text="1"
-        app:layout_constraintStart_toStartOf="@+id/con_sort"
-        app:layout_constraintTop_toBottomOf="@+id/con_sort" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/con_sun_id" />
 
     <TextView
         android:id="@+id/two_con_id"
@@ -180,43 +177,28 @@
         app:layout_constraintTop_toBottomOf="@+id/eight_con_id" />
 
     <TextView
-        android:id="@+id/con_plus_id"
-        android:layout_width="70dp"
-        android:layout_height="45dp"
-        android:layout_marginStart="25dp"
-        android:background="@drawable/hole_view"
-        android:gravity="center"
-        android:text="@string/add_random"
-        android:textSize="12sp"
-        app:layout_constraintStart_toEndOf="@+id/con_sort"
-        app:layout_constraintTop_toTopOf="@+id/con_sun_id" />
-
-    <TextView
         android:id="@+id/con_sun_id"
         android:layout_width="70dp"
         android:layout_height="45dp"
-        android:layout_marginStart="26dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_marginEnd="4dp"
         android:background="@drawable/hole_view"
         android:gravity="center"
         android:text="@string/week"
         android:textSize="12sp"
         app:layout_constraintEnd_toStartOf="@+id/food_list_id"
-        app:layout_constraintStart_toEndOf="@+id/con_plus_id"
-        app:layout_constraintTop_toBottomOf="@+id/con_day_id" />
+        app:layout_constraintStart_toStartOf="@+id/con_search_id"
+        app:layout_constraintTop_toTopOf="@+id/food_list_id" />
 
     <TextView
         android:id="@+id/food_list_id"
         android:layout_width="70dp"
         android:layout_height="45dp"
-        android:layout_marginStart="26dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:background="@drawable/hole_view"
         android:gravity="center"
         android:text="@string/foods"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="@+id/con_search_btn"
         app:layout_constraintStart_toEndOf="@+id/con_sun_id"
         app:layout_constraintTop_toBottomOf="@+id/con_search_id" />
 
@@ -224,12 +206,13 @@
         android:id="@+id/con_sc_id"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="8dp"
+
         android:layout_marginBottom="45dp"
         app:layout_constraintBottom_toBottomOf="parent"
-
         app:layout_constraintStart_toEndOf="@+id/nine_con_id"
-        app:layout_constraintTop_toBottomOf="@+id/con_plus_id"
+        app:layout_constraintTop_toBottomOf="@+id/con_sun_id"
         app:layout_constraintWidth_default="percent"
         app:layout_constraintWidth_percent=".45">
 
@@ -247,13 +230,13 @@
         android:id="@+id/con_sc_id2"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginEnd="4dp"
         android:layout_marginBottom="45dp"
-        app:layout_constraintBottom_toBottomOf="parent"
 
-        app:layout_constraintEnd_toEndOf="@+id/con_search_btn"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/con_sc_id"
-        app:layout_constraintTop_toBottomOf="@+id/con_sun_id"
+        app:layout_constraintTop_toTopOf="@+id/con_sc_id"
         app:layout_constraintWidth_default="percent"
         app:layout_constraintWidth_percent=".45">
 
