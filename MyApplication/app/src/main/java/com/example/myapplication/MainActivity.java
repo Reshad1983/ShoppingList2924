@@ -10,10 +10,14 @@ import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
@@ -31,11 +35,12 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
     int found = 0;
-    TextView sd_num_view;
     TextView food_sum_view;
     TextView week_view;
     TextView snooze_btn;
-    TextView plus_btn;
+    Spinner spinner;
+    String position_of_item;
+    ArrayAdapter<CharSequence> adapter;
     LinearLayout list_view;
     LinearLayout buy_list;
     TextView one_btn;
@@ -62,15 +67,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.new_main_layout);
+        setContentView(R.layout.main_layout);
         initialize();
-        snooze_btn.setOnClickListener(this);
-        day_select.setOnClickListener(this);
-        food_sum_view.setOnClickListener(this);
-        plus_btn.setOnLongClickListener(this);
-        search_btn.setOnLongClickListener(this);
-        search_btn.setOnClickListener(this);
-        sd_num_view.setOnClickListener(this);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                position_of_item = parent.getItemAtPosition(position).toString();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                position_of_item = "1";
+            }
+        });
         List<NameStatusPair> items = sdb.getItemsSortedByUsage();
         add_items_to_view(items);
         sort_list_view("-1");
@@ -85,7 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     //----------------------------------------------------------------------------------------------------------
     private void add_items_to_view(List <NameStatusPair> item_to_show) {
         for(NameStatusPair item : item_to_show){
-            View itemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+            View itemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
             addItemToLayout(itemView, item);
         }
     }    //----------------------------------------------------------------------------------------------------------
@@ -241,7 +251,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         ((ViewGroup)itemView.getParent()).removeView(itemView);
                     }
                     buy_list.removeView(itemView);
-                    View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                    View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                     addItemToLayout(mitemView, item);
                 }, 500);
                 Toast.makeText(MainActivity.this, "Usage updated!", Toast.LENGTH_SHORT).show();
@@ -301,7 +311,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         ((ViewGroup)itemView.getParent()).removeView(itemView);
                     }
                     buy_list.removeView(itemView);
-                    View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                    View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                     addItemToLayout(mitemView, item);
                 }, 500);
             }
@@ -319,7 +329,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item_name.setTextColor(Color.BLACK);
                 itemView.setBackgroundResource(R.drawable.bordered_transparent);
                 buy_list.removeView(itemView);
-                View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                 addItemToLayout(mitemView, item);
             }
 
@@ -334,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item.setStatus("0");
                 item.set_date(date_string);
                 buy_list.removeView(itemView);
-                View mitemView = getLayoutInflater().inflate(R.layout.new_item_layout, null, false);
+                View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                 addItemToLayout(mitemView, item);
                 return false;
             });
@@ -419,17 +429,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "No item selected to snooze!", Toast.LENGTH_LONG).show();
             }
         }
-        else if(btn_id == R.id.con_sort){
-            refresh();
-            List<NameStatusPair> items1;
-            if (sorting) {
-                    items1 = sdb.getItemsSortedByPosition();
-            } else {
-                    items1 = sdb.getItemsSortedByUsage();
-            }
-            add_items_to_view(items1);
-            sorting = !sorting;
-        }
         else if(btn_id == R.id.food_list_id){
             food_sum_view.setText(sdb.get_number_of_foods() + "");
             food_sum_view.setBackgroundResource(R.drawable.checked);
@@ -475,32 +474,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             list_view.removeAllViews();
             buy_list.removeAllViews();
             if (search_text.isEmpty()) {
+                refresh();
                 sc_view.fullScroll(ScrollView.FOCUS_UP);
-                    items = sdb.getItemsSortedByUsage();
-                add_items_to_view(items);
+                List<NameStatusPair> items1;
+                if (sorting) {
+                    items1 = sdb.getItemsSortedByPosition();
+                } else {
+                    items1 = sdb.getItemsSortedByUsage();
+                }
+                add_items_to_view(items1);
+                sorting = !sorting;
                 sort_list_view("-1");
                 search_item.setHint("SAR");
                 found = 1;
-            }  else if ((search_text.trim().length() == 1) && (Integer.parseInt(search_text) < 10) && (Integer.parseInt(search_text) > 0)) {
 
-                    items = sdb.getItemsSortedByUsage();
-                for (NameStatusPair item : items) {
-                    if (item.getPos().equals(search_text)) {
-                        found = 1;
-                        search_items.add(item);
-                    }
-                }
-                add_items_to_view(search_items);
-
-                sc_view.fullScroll(ScrollView.FOCUS_UP);
-                search_item.setText("");
-                InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
             } else {
                     items = sdb.getItemsSortedByUsage();
                 for (NameStatusPair item : items) {
                     if (item.getName().trim().toLowerCase().contains(search_text.trim().toLowerCase())) {
-                        search_item.setHint("Found!");
                         found = 1;
                         search_items.add(item);
                     }
@@ -511,29 +502,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 add_items_to_view(search_items);
             }
             if (found == 0) {
-                search_item.setText("");
                 search_item.setHint("Not found!");
+            }else {
+                search_item.setText("");
+                search_item.setHint("Found!");
+                found = 0;
             }
             search_items.clear();
-        } else{
+        }
+        else if(btn_id == R.id.con_sun_id){
+            refresh();
+            show_days_meal();
+        }
+        else{
             List<NameStatusPair >items;
             String pos = getString(v);
-            list_view.removeAllViews();
-            buy_list.removeAllViews();
-            if(pos.equals("week")){
-                show_days_meal();
-            }
-            else{
-                search_item.setText("");
-                    items = sdb.getItemsSortedByUsage();
-                for (NameStatusPair item_pos_search : items) {
-                    if (item_pos_search.getPos().equals(pos)) {
-                        search_items.add(item_pos_search);
-                    }
+            refresh();
+            search_item.setText("");
+                items = sdb.getItemsSortedByUsage();
+            for (NameStatusPair item_pos_search : items) {
+                if (item_pos_search.getPos().equals(pos)) {
+                    search_items.add(item_pos_search);
                 }
-                v.setBackgroundResource(R.drawable.checked);
-                add_items_to_view(search_items);
             }
+            v.setBackgroundResource(R.drawable.checked);
+            add_items_to_view(search_items);
             sc_view.fullScroll(ScrollView.FOCUS_UP);
             InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
@@ -588,11 +581,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onLongClick(View v) {
         int btn_id = v.getId();
-        if(btn_id  == R.id.con_plus_id){
+            if(btn_id == R.id.con_sun_id){
+            refresh();
             list_of_ingredients = new StringBuilder();
             if(search_item.getText().toString().isEmpty()){
-                list_view.removeAllViews();
-                buy_list.removeAllViews();
                 get_random_day_food();
                 Toast.makeText(MainActivity.this, "Food for week added!", Toast.LENGTH_SHORT).show();
             }
@@ -601,7 +593,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
             else{
                 List<NameStatusPair> food_items;
-                    food_items = sdb.getItemsSortedByPosition();
+                food_items = sdb.getItemsSortedByPosition();
                 for(NameStatusPair item: food_items){
                     if(item.getStatus().equals("1")){
                         list_of_ingredients.append("-").append(item.getName());
@@ -613,68 +605,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 search_item.setText("");
                 Toast.makeText(MainActivity.this, "New food added!", Toast.LENGTH_SHORT).show();
             }
-        } else if (btn_id == R.id.con_search_id) {
+        }else if (btn_id == R.id.con_search_btn) {
 
-            reset_btn_color();
-            String search_text = search_item.getText().toString();
-            String[] search_name_pos_duration = search_text.split("\\s+");
-            list_view.removeAllViews();
-            buy_list.removeAllViews();
             //Reset all status if nothing entered
+                String search_text = search_item.getText().toString();
             if (search_text.isEmpty()) {
                 sdb.reset_status();
                 Toast.makeText(MainActivity.this, "Status reset!", Toast.LENGTH_LONG).show();
-            }// If user entered just a number then an item interval should be updated
-            else if (is_a_number(search_text)) {
-                Toast.makeText(this, "Press the view", Toast.LENGTH_LONG).show();
-                search_item.setText("");
             } else{
-                int pos = 0;
-                int duration = 0;
-                //If user entered 3 separated input in search box and two of them are numbers then it must be name, position and duration
-                if ((search_name_pos_duration.length == 3) && (is_a_number(search_name_pos_duration[1]))){
-                    try{
-                        duration = Integer.parseInt(search_name_pos_duration[2]);
-                        pos = Integer.parseInt(search_name_pos_duration[1]);
-                    } catch (Resources.NotFoundException e) {
-                        Toast.makeText(this, "Enter position or duration", Toast.LENGTH_LONG).show();
-                    }
-                    sdb.add_item(search_name_pos_duration[0], pos, duration);
-                    Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
-                    //If user entered 3 separated input in search box and the second one is also a text then it must be item name and position, duration must be 1
-                } else if ((search_name_pos_duration.length == 3) && !(is_a_number(search_name_pos_duration[1]) && is_a_number(search_name_pos_duration[2]))){
-                    try{
-                        pos = Integer.parseInt(search_name_pos_duration[2]);
-                    }
-                    catch (Resources.NotFoundException e){
-                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
-                    }
-                    sdb.add_item(search_name_pos_duration[0] + " " + search_name_pos_duration[1], pos, 0);
-                    Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
-                    //If user entered 3 separated input in search box and two of them are numbers then it must be name, position and duration
-                } else if (search_name_pos_duration.length == 4) {
-                    try {
-                        duration = Integer.parseInt(search_name_pos_duration[3]);
-                        pos = Integer.parseInt(search_name_pos_duration[2]);
-                    } catch (Resources.NotFoundException e) {
-                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
-                    }
-                    sdb.add_item(search_name_pos_duration[0] + " " + search_name_pos_duration[1], pos, duration);
-                    Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
-
-                }else if (search_name_pos_duration.length == 2){
-                    try{
-                        pos = Integer.parseInt(search_name_pos_duration[1]);
-                    } catch (Resources.NotFoundException e) {
-                        Toast.makeText(this, "Position error", Toast.LENGTH_SHORT).show();
-                    }
-                    sdb.add_item(search_name_pos_duration[0], pos, 1);
-                    Toast.makeText(this, "New Item added!", Toast.LENGTH_LONG).show();
-                }
-                search_item.setText("");
+                reset_btn_color();
+                refresh();
+                sdb.add_item(search_text, Integer.parseInt(position_of_item), 1);
+                Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
             }
             List<NameStatusPair> items = sdb.getItemsSortedByUsage();
             add_items_to_view(items);
+            search_item.setText("");
+            search_item.setHint("SAR");
         } else{
             String day = day_select.getText().toString();
             reset_btn_color();
@@ -713,13 +660,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sdb = new DatabaseHelper(MainActivity.this);
         search_item = findViewById(R.id.con_search_id);
         sc_view = findViewById(R.id.con_sc_id);
+        spinner = (Spinner)findViewById(R.id.spinner_id);
         search_btn = findViewById(R.id.con_search_btn);
         day_select = findViewById(R.id.con_day_id);
-        sd_num_view = findViewById(R.id.con_sort);
-        plus_btn = findViewById(R.id.con_plus_id);
         week_view = findViewById(R.id.con_sun_id);
         day_select.setOnLongClickListener(this);
         week_view.setOnClickListener(this);
+        week_view.setOnLongClickListener(this);
         day_food_to_show = new ArrayList<>();
         day_food_to_show.add("Mo");
         day_food_to_show.add("Tu");
@@ -728,6 +675,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         day_food_to_show.add("Fr");
         day_food_to_show.add("Sa");
         day_food_to_show.add("Su");
+        adapter = ArrayAdapter.createFromResource(MainActivity.this, R.array.number_array , android.R.layout.simple_spinner_item );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
         one_btn = findViewById(R.id.one_con_id);
         two_btn = findViewById(R.id.two_con_id);
         three_btn = findViewById(R.id.three_con_id);
@@ -747,5 +697,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
         eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
         nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
+        snooze_btn.setOnClickListener(this);
+        day_select.setOnClickListener(this);
+        food_sum_view.setOnClickListener(this);
+        search_btn.setOnLongClickListener(this);
+        search_btn.setOnClickListener(this);
+        position_of_item = "1";
     }
 }
