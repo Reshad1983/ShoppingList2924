@@ -112,8 +112,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startForegroundService(new Intent(this, CheckDataBase.class));
     }
     private void sort_list_view(String pos) {
-        List<NameStatusPair> list = sdb.sort_buy_list(pos);
-        buy_list.removeAllViews();
+       List<NameStatusPair> list = sdb.sort_buy_list(pos);
+        //buy_list.removeAllViews();
         add_items_to_view(list);
         handler.postDelayed(() -> {
             buy_list.removeAllViews();
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void add_items_to_view(List <NameStatusPair> item_to_show) {
         for(NameStatusPair item : item_to_show){
             View itemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-            addItemToLayout(itemView, item);
+            addItemToLayout(itemView, item, -1);
         }
     }    //----------------------------------------------------------------------------------------------------------
     private void add_food_to_view(List <String> item_to_show) {
@@ -241,7 +241,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 /*.........................................................................................................................
 ...........................................................................................................................
  */
-    public void addItemToLayout(View itemView, NameStatusPair item){
+    public void addItemToLayout(View itemView, NameStatusPair item, int pos){
         TextView item_name = itemView.findViewById(R.id.con_item_id);
         TextView item_interval = itemView.findViewById(R.id.con_interval_id);
         TextView item_use = itemView.findViewById(R.id.usa_id);
@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     buy_list.removeView(itemView);
                     View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                    addItemToLayout(mitemView, item);
+                    addItemToLayout(mitemView, item, -1);
                 }, 500);
                 Toast.makeText(MainActivity.this, "Usage updated!", Toast.LENGTH_SHORT).show();
             }
@@ -312,9 +312,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item_interval.setBackgroundResource(R.drawable.unchecked);
                 sdb.update_status(1, item.getName());
                 item.setStatus("1");
-                item.set_prio(""+ list_view.indexOfChild(itemView));
                 list_view.removeView(itemView);
-                sort_list_view(item.getPos());
+                View itemView_at = getLayoutInflater().inflate(R.layout.item_layout, null, false);
+                addItemToLayout(itemView_at, item, 0);
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        refresh();
+                        List<NameStatusPair> items_after_at = sdb.getItemsSortedByPosition();
+                        add_items_to_view(items_after_at);
+                        sort_list_view("-1");
+                    }
+                }, 400);
+
             }
             else if(item.getStatus().equals("1")){
                 SimpleDateFormat sdf = new SimpleDateFormat("E");
@@ -361,7 +371,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                         buy_list.removeView(itemView);
                         View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                        addItemToLayout(mitemView, item);
+                        addItemToLayout(mitemView, item, -1);
                     }, 500);
 
                 }
@@ -382,7 +392,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 itemView.setBackgroundResource(R.drawable.bordered_transparent);
                 buy_list.removeView(itemView);
                 View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                addItemToLayout(mitemView, item);
+                addItemToLayout(mitemView, item, -1);
             }
 
         });
@@ -397,7 +407,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item.set_date(date_string);
                 buy_list.removeView(itemView);
                 View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                addItemToLayout(mitemView, item);
+                addItemToLayout(mitemView, item, -1);
                 return false;
             });
         item_use.setTextColor(Color.BLACK);
@@ -435,7 +445,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item_name.setTextColor(Color.BLACK);
                 itemView.setBackgroundResource(R.drawable.bordered_transparent);
                 item_interval.setBackgroundResource(R.drawable.unchecked);
-                buy_list.addView(itemView);
+                if(pos == -1){
+                    buy_list.addView(itemView);
+                }
+                else {
+                    buy_list.addView(itemView, 0);
+                }
                 break;
         }
     }
