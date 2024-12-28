@@ -119,14 +119,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL(query);
         db.close();
     }
-
-    public void reset_rare_items()
-    {
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "UPDATE " + TABLE_ITEMS + " SET " + RARE_ITEM + " = \"0\"" ;
-        db.execSQL(query);
-        db.close();
-    }
     public void update_status(int status, String name)
     {
         String string_status = ""+status;
@@ -318,17 +310,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             while (cursor.moveToNext());
             cursor.close();
         }
-        return (food_of_day.size()==0) ? null : food_of_day;
+        return (food_of_day.isEmpty()) ? null : food_of_day;
 
 
-    }
-
-    public void remove_from_food_table(CharSequence text) {
-        String food_name = text.toString();
-        SQLiteDatabase db = this.getWritableDatabase();
-        String query = "DELETE FROM " + TABLE_FOOD + " WHERE "+ COLUMN_NAME + " = ?";
-        db.execSQL(query, new String[]{food_name});
-        db.close();
     }
 
     public String get_ingred_for_food(String string) {
@@ -341,6 +325,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 food_ingred = cursor.getString(0);
             }while(cursor.moveToNext());
         }
+        db.close();
         return food_ingred;
     }
 

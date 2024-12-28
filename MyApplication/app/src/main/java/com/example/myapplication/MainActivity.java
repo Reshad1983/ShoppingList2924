@@ -1,7 +1,6 @@
 package com.example.myapplication;
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.text.LineBreakConfig;
 import android.os.Build;
@@ -12,12 +11,11 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
@@ -26,14 +24,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener, View.OnLongClickListener, AdapterView.OnItemClickListener, AdapterView.OnItemSelectedListener {
     int found = 0;
     TextView food_sum_view;
     TextView week_view;
@@ -56,40 +51,75 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     TextView day_select;
     public DatabaseHelper sdb;
     boolean sorting = true;
-    EditText search_item;
     ScrollView sc_view;
     int num_of_days = 7;
     private StringBuilder list_of_ingredients;
     private TextView global_food_view;
     private TextView search_btn;
+    boolean at_item;
     private List<String> day_food_to_show;
-
+    String []item_names;
+    ArrayAdapter<String> at_adapter;
+    AutoCompleteTextView at_view;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.main_layout);
         initialize();
-
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 position_of_item = parent.getItemAtPosition(position).toString();
             }
-
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
                 position_of_item = "1";
             }
         });
         List<NameStatusPair> items = sdb.getItemsSortedByUsage();
+
+        item_names = new String[items.size()];
+        for(int i = 0; i < item_names.length; i++){
+            item_names[i] = items.get(i).getName();
+        }
+        at_adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, item_names);
+        at_view = findViewById(R.id.search_id);
+        at_view.setAdapter(at_adapter);
+        at_view.setOnItemClickListener((parent, view, position, id) -> {
+            List<NameStatusPair> search_items = new ArrayList<>();
+            for (NameStatusPair item : items) {
+                if (item.getName().trim().toLowerCase().contains(parent.getItemAtPosition(position).toString().trim().toLowerCase())) {
+                    found = 1;
+                    search_items.add(item);
+                }
+            }
+            refresh();
+            at_view.setText("");
+            InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(at_view.getWindowToken(), 0);
+            add_items_to_view(search_items);
+            if (found == 0) {
+                at_view.setHint("Not found!");
+            }else {
+                at_view.setHint("Found!");
+                found = 0;
+            }
+            at_item = true;
+            search_items.clear();
+        });
         add_items_to_view(items);
         sort_list_view("-1");
         startForegroundService(new Intent(this, CheckDataBase.class));
     }
     private void sort_list_view(String pos) {
-        buy_list.removeAllViews();
         List<NameStatusPair> list = sdb.sort_buy_list(pos);
+        buy_list.removeAllViews();
         add_items_to_view(list);
+        handler.postDelayed(() -> {
+            buy_list.removeAllViews();
+            List<NameStatusPair> list1 = sdb.sort_buy_list("-1");
+            add_items_to_view(list1);
+        },1000);
     }
     //----------------------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------------------
@@ -137,52 +167,50 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void add_food_name_to_layout(View foodView, String item, int i) {
         TextView item_name = foodView.findViewById(R.id.food_name_id);
         TextView add_ingredient = foodView.findViewById(R.id.food_ingredients_id);
+        List<NameStatusPair> items_to_check_status = sdb.getItemsSortedByPosition();
         add_ingredient.setOnLongClickListener(v -> {
-            List<NameStatusPair> items_to_check_status = sdb.getItemsSortedByPosition();
-            StringBuilder new_ingredients = new StringBuilder();
-            for(NameStatusPair item1 : items_to_check_status){
-                if(item1.getStatus().equals("1")){
-                    if(new_ingredients.length() == 0){
-                        new_ingredients.append(item1.getName());
-                    }
-                    else{
-                        new_ingredients.append("-").append(item1.getName());
+            if(at_view.getText().toString().isEmpty()){
+                String ingredients = add_ingredient.getText().toString();
+                String [] sep_ingredients = ingredients.split("\n");
+                for (String sepIngredient : sep_ingredients) {
+                    for (NameStatusPair item_to_check : items_to_check_status) {
+                        if (item_to_check.getName().equals(sepIngredient.trim())) {
+                            sdb.update_status(1, item_to_check.getName());
+                        }
                     }
                 }
             }
-            sdb.add_ingredients_to_food(item_name.getText().toString(), new_ingredients.toString());
-            refresh();
-            List<FoodDay> food_list = sdb.get_food_names();
-            List<String> food_name_list = new ArrayList<>();
-            for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
-            add_food_to_view(food_name_list);
-            Toast.makeText(MainActivity.this, "New ingredients added!", Toast.LENGTH_LONG).show();
+            else{
+                StringBuilder new_ingredients = new StringBuilder();
+                for(NameStatusPair item1 : items_to_check_status){
+                    if(item1.getStatus().equals("1")){
+                        if(new_ingredients.length() == 0){
+                            new_ingredients.append(item1.getName());
+                        }
+                        else{
+                            new_ingredients.append("-").append(item1.getName());
+                        }
+                    }
+                }
+                sdb.add_ingredients_to_food(item_name.getText().toString(), new_ingredients.toString());
+                refresh();
+                List<FoodDay> food_list = sdb.get_food_names();
+                List<String> food_name_list = new ArrayList<>();
+                for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
+                add_food_to_view(food_name_list);
+                Toast.makeText(MainActivity.this, "New ingredients added!", Toast.LENGTH_LONG).show();
+            }
             return false;
         });
         item_name.setText(item);
-        item_name.setOnClickListener(v -> {
+        item_name.setOnLongClickListener(v -> {
             item_name.setBackgroundResource(R.drawable.unchecked);
             sdb.set_food_to_day(item_name.getText().toString(), day_select.getText().toString());
             Toast.makeText(this, "Food added to day!", Toast.LENGTH_LONG).show();
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    list_view.removeAllViews();
-                    buy_list.removeAllViews();
-                    show_days_meal();
-                }
+            handler.postDelayed(() -> {
+                refresh();
+                show_days_meal();
             },800);
-
-        });
-        item_name.setOnLongClickListener(v -> {
-            String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
-            String[]ingredients = day_food.split("-");
-            for (String ingredient : ingredients) {
-                if(!ingredient.isEmpty()){
-                   sdb.update_status(1, ingredient);
-                }
-            }
-            Toast.makeText(MainActivity.this, "Ingredients are unchecked!", Toast.LENGTH_LONG).show();
             return false;
         });
         String day_food = sdb.get_ingred_for_food(item_name.getText().toString());
@@ -216,23 +244,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void addItemToLayout(View itemView, NameStatusPair item){
         TextView item_name = itemView.findViewById(R.id.con_item_id);
         TextView item_interval = itemView.findViewById(R.id.con_interval_id);
-        TextView item_use = itemView.findViewById(R.id.con_usa_id);
+        TextView item_use = itemView.findViewById(R.id.usa_id);
+        CheckBox cb = itemView.findViewById(R.id.checkBox_id);
         item_interval.setOnClickListener(v -> {
-            if(!search_item.getText().toString().isEmpty()){
-                if(is_a_number(search_item.getText().toString())) {
-                    sdb.update_interval( Integer.parseInt(search_item.getText().toString()), item.getName());
-                    item.set_interval(search_item.getText().toString());
+            if(!at_view.getText().toString().isEmpty()){
+                if(is_a_number(at_view.getText().toString())) {
+                    sdb.update_interval( Integer.parseInt(at_view.getText().toString()), item.getName());
+                    item.set_interval(at_view.getText().toString());
                     item_interval.setTextColor(Color.BLACK);
                     item_interval.setText(item.get_date()+ " ");
                     num_of_days = 7;
                     Toast.makeText(MainActivity.this, "Interval updated", Toast.LENGTH_LONG).show();
-                    search_item.setText("");
+                    at_view.setText("");
                 }
             }
         });
         item_name.setOnLongClickListener(v -> {
-            if(!search_item.getText().toString().isEmpty()){
-                String new_name = search_item.getText().toString();
+            if(!at_view.getText().toString().isEmpty()){
+                String new_name = at_view.getText().toString();
                 sdb.update_item_name(new_name , item.getName());
                 item.set_name(new_name);
                 Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
@@ -257,11 +286,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Usage updated!", Toast.LENGTH_SHORT).show();
             }
             else{
-
-                sdb.removeItem(item_name.getText().toString());
-                list_view.removeView(itemView);
+                if(cb.isChecked()){
+                    sdb.removeItem(item_name.getText().toString());
+                    list_view.removeView(itemView);
+                }else {
+                    sdb.update_position(position_of_item,item_name.getText().toString());
+                    item.setPos(position_of_item);
+                    Toast.makeText(MainActivity.this, "Position updated!", Toast.LENGTH_LONG).show();
+                    List<NameStatusPair> item_pos_update = new ArrayList<>();
+                    if(item.getStatus().equals("1")){
+                        buy_list.removeView(itemView);
+                    }else{
+                        list_view.removeView(itemView);
+                    }
+                        item_pos_update.add(item);
+                        add_items_to_view(item_pos_update);
+                        item_pos_update.clear();
+                }
             }
-            search_item.setText("");
+            at_view.setText("");
             return true;
         });
         item_name.setOnClickListener(v -> {
@@ -274,46 +317,55 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 sort_list_view(item.getPos());
             }
             else if(item.getStatus().equals("1")){
-                Date date = new Date();
-                Date  lDate = new Date();
-                boolean null_date = false;
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String date_string = sdf.format(date);
-                itemView.setBackgroundResource(R.drawable.checked);
-                sdb.increment_usage_count(item.getName());
-                sdb.update_status(0, item.getName());
-                if(item.get_date() == null){
-                    null_date = true;
+                SimpleDateFormat sdf = new SimpleDateFormat("E");
+                String date_string = sdf.format(new Date());
+                if((date_string.equals("fre")) || (date_string.equals("Fri"))){
+                    Date date = new Date();
+                    Date  lDate = new Date();
+                    boolean null_date = false;
+                    sdf = new SimpleDateFormat("yyyy-MM-dd");
+                    date_string = sdf.format(date);
+                    if(item.get_date() == null){
+                        null_date = true;
+                    }
+                    else{
+                        try {
+                            lDate = sdf.parse(item.get_date());
+                        } catch (ParseException e) {
+                            lDate = new Date();
+                        }
+                    }
+                    assert lDate != null;
+                    long difference = Math.abs(date.getTime() - lDate.getTime());
+                    long differenceDates = difference / (24 * 60 * 60 * 1000);
+                    if((int)differenceDates >= 7 || null_date){
+                        sdb.update_interval((int)differenceDates, item.getName());
+                        sdb.update_date(date_string, item_name.getText().toString());
+                        item.set_interval((int)differenceDates + "");
+                        Toast.makeText(MainActivity.this, "Interval: " + (int)differenceDates, Toast.LENGTH_LONG).show();
+                        item_interval.setText(date_string);
+                        item.set_date(date_string);
+                    }
                 }
                 else{
-                    try {
-                        lDate = sdf.parse(item.get_date());
-                    } catch (ParseException e) {
-                        lDate = new Date();
-                    }
+                    itemView.setBackgroundResource(R.drawable.checked);
+                    sdb.update_status(0, item.getName());
+                    sdb.increment_usage_count(item.getName());
+                    item.setStatus("0");
+                    handler = new Handler();
+                    Toast.makeText(MainActivity.this, "Usage added!", Toast.LENGTH_LONG).show();
+                    handler.postDelayed(() -> {
+                        itemView.setBackgroundResource(R.drawable.bordered_transparent);
+                        if(itemView.getParent() != null){
+                            ((ViewGroup)itemView.getParent()).removeView(itemView);
+                        }
+                        buy_list.removeView(itemView);
+                        View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
+                        addItemToLayout(mitemView, item);
+                    }, 500);
+
                 }
-                assert lDate != null;
-                long difference = Math.abs(date.getTime() - lDate.getTime());
-                long differenceDates = difference / (24 * 60 * 60 * 1000);
-                if((int)differenceDates >= 7 || (null_date == true)){
-                    sdb.update_interval((int)differenceDates, item.getName());
-                    sdb.update_date(date_string, item_name.getText().toString());
-                    item.set_interval((int)differenceDates + "");
-                    Toast.makeText(MainActivity.this, "Interval: " + (int)differenceDates, Toast.LENGTH_LONG).show();
-                    item_interval.setText(date_string);
-                    item.set_date(date_string);
-                }
-                item.setStatus("0");
-                handler = new Handler();
-                handler.postDelayed(() -> {
-                    itemView.setBackgroundResource(R.drawable.bordered_transparent);
-                    if(itemView.getParent() != null){
-                        ((ViewGroup)itemView.getParent()).removeView(itemView);
-                    }
-                    buy_list.removeView(itemView);
-                    View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                    addItemToLayout(mitemView, item);
-                }, 500);
+
             }
         });
         item_name.setText(item.getName());
@@ -404,6 +456,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         reset_btn_color();
         int btn_id = v.getId();
         if(btn_id == R.id.snooze_id){
+            snooze_btn.setBackgroundResource(R.drawable.checked);
+            handler.postDelayed(() -> snooze_btn.setBackgroundResource(R.drawable.hole_view), 500);
             for(int i = 0; i < buy_list.getChildCount(); i++){
                 View item_view = buy_list.getChildAt(i);
                 CheckBox cb = item_view.findViewById(R.id.checkBox_id);
@@ -438,56 +492,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             for(FoodDay food : food_list) food_name_list.add(food.getFoodName());
             add_food_to_view(food_name_list);
             handler.postDelayed(() -> food_sum_view.setBackgroundResource(R.drawable.hole_view), 300);
-        } else if (btn_id == R.id.con_day_id) {
-            String selected_day_string = day_select.getText().toString();
-            switch (selected_day_string) {
-                case "Day":
-                    day_select.setText(R.string.monday);
-                    break;
-                case "Mo":
-                    day_select.setText(R.string.tuesday);
-                    break;
-                case "Tu":
-                    day_select.setText(R.string.wednesday);
-                    break;
-                case "We":
-                    day_select.setText(R.string.thursday);
-                    break;
-                case "Th":
-                    day_select.setText(R.string.friday);
-                    break;
-                case "Fr":
-                    day_select.setText(R.string.saturday);
-                    break;
-                case "Sa":
-                    day_select.setText(R.string.sunday);
-                    break;
-                case "Su":
-                    day_select.setText(R.string.day);
-                    break;
-            }
-        } else if (btn_id == R.id.con_search_btn) {
+        } else if (btn_id == R.id.day_id) {
+            set_text_to_day_textview(day_select);
+
+        } else if (btn_id == R.id.search_btn) {
             search_btn.setBackgroundResource(R.drawable.checked);
-            handler.postDelayed(() -> search_btn.setBackgroundResource(R.drawable.hole_view), 300);
-            String search_text = search_item.getText().toString();
+            handler.postDelayed(() -> search_btn.setBackgroundResource(R.drawable.hole_view), 500);
+            String search_text = at_view.getText().toString();
             List<NameStatusPair> items;
-            list_view.removeAllViews();
-            buy_list.removeAllViews();
+            refresh();
             if (search_text.isEmpty()) {
-                refresh();
                 sc_view.fullScroll(ScrollView.FOCUS_UP);
-                List<NameStatusPair> items1;
                 if (sorting) {
-                    items1 = sdb.getItemsSortedByPosition();
+                    items = sdb.getItemsSortedByPosition();
                 } else {
-                    items1 = sdb.getItemsSortedByUsage();
+                    items = sdb.getItemsSortedByUsage();
                 }
-                add_items_to_view(items1);
+                add_items_to_view(items);
                 sorting = !sorting;
                 sort_list_view("-1");
-                search_item.setHint("SAR");
-                found = 1;
-
+                at_view.setHint("SAR");
+                items.clear();
             } else {
                     items = sdb.getItemsSortedByUsage();
                 for (NameStatusPair item : items) {
@@ -496,19 +521,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         search_items.add(item);
                     }
                 }
-                search_item.setText("");
+                at_view.setText("");
                 InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
+                imm.hideSoftInputFromWindow(at_view.getWindowToken(), 0);
                 add_items_to_view(search_items);
+                if (found == 0) {
+                    at_view.setHint("Not found!");
+                }else {
+                    at_view.setHint("Found!");
+                    found = 0;
+                }
+                search_items.clear();
             }
-            if (found == 0) {
-                search_item.setHint("Not found!");
-            }else {
-                search_item.setText("");
-                search_item.setHint("Found!");
-                found = 0;
-            }
-            search_items.clear();
+
         }
         else if(btn_id == R.id.con_sun_id){
             refresh();
@@ -518,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             List<NameStatusPair >items;
             String pos = getString(v);
             refresh();
-            search_item.setText("");
+            at_view.setText("");
                 items = sdb.getItemsSortedByUsage();
             for (NameStatusPair item_pos_search : items) {
                 if (item_pos_search.getPos().equals(pos)) {
@@ -529,23 +554,40 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             add_items_to_view(search_items);
             sc_view.fullScroll(ScrollView.FOCUS_UP);
             InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(search_item.getWindowToken(), 0);
+            imm.hideSoftInputFromWindow(at_view.getWindowToken(), 0);
 
         }
     }
-    private static final Set<String> WEEKDAYS = new HashSet<>(Arrays.asList(
-            "Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"
-    ));
 
-    // Method to check if a string is a weekday name
-    public static boolean isWeekday(String day) {
-        if (day == null || day.trim().isEmpty()) {
-            return false;
+    private void set_text_to_day_textview(TextView daySelect) {
+        String selected_day_string = daySelect.getText().toString();
+        switch (selected_day_string) {
+            case "Day":
+                day_select.setText(R.string.monday);
+                break;
+            case "Mo":
+                day_select.setText(R.string.tuesday);
+                break;
+            case "Tu":
+                day_select.setText(R.string.wednesday);
+                break;
+            case "We":
+                day_select.setText(R.string.thursday);
+                break;
+            case "Th":
+                day_select.setText(R.string.friday);
+                break;
+            case "Fr":
+                day_select.setText(R.string.saturday);
+                break;
+            case "Sa":
+                day_select.setText(R.string.sunday);
+                break;
+            case "Su":
+                day_select.setText(R.string.day);
+                break;
         }
-        // Check if the trimmed, case-normalized string is in the WEEKDAYS set
-        return WEEKDAYS.contains(day.trim().toLowerCase().substring(0, 1).toUpperCase() + day.trim().toLowerCase().substring(1));
     }
-
     private @NonNull String getString(View v) {
         int i = v.getId();
         String pos = "";
@@ -580,15 +622,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onLongClick(View v) {
+        List<NameStatusPair>search_items = new ArrayList<>();
         int btn_id = v.getId();
             if(btn_id == R.id.con_sun_id){
             refresh();
             list_of_ingredients = new StringBuilder();
-            if(search_item.getText().toString().isEmpty()){
+            if(at_view.getText().toString().isEmpty()){
                 get_random_day_food();
                 Toast.makeText(MainActivity.this, "Food for week added!", Toast.LENGTH_SHORT).show();
             }
-            else if(is_a_number(search_item.getText().toString()))            {
+            else if(is_a_number(at_view.getText().toString()))            {
                 Toast.makeText(MainActivity.this, "Please enter food name!", Toast.LENGTH_SHORT).show();
             }
             else{
@@ -600,29 +643,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                 }
                 //Here to add food name and ingredients to database
-                sdb.add_food(search_item.getText().toString(), list_of_ingredients.toString(), day_select.getText().toString());
+                sdb.add_food(at_view.getText().toString(), list_of_ingredients.toString(), day_select.getText().toString());
                 food_sum_view.setText(sdb.get_food_names().size()+"");
-                search_item.setText("");
+                at_view.setText("");
                 Toast.makeText(MainActivity.this, "New food added!", Toast.LENGTH_SHORT).show();
             }
-        }else if (btn_id == R.id.con_search_btn) {
-
-            //Reset all status if nothing entered
-                String search_text = search_item.getText().toString();
+        }else if (btn_id == R.id.search_btn) {
+            //Reset all status if nothing enter
+            String search_text = at_view.getText().toString();
             if (search_text.isEmpty()) {
                 sdb.reset_status();
                 Toast.makeText(MainActivity.this, "Status reset!", Toast.LENGTH_LONG).show();
             } else{
                 reset_btn_color();
-                refresh();
                 sdb.add_item(search_text, Integer.parseInt(position_of_item), 1);
                 Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
             }
+            refresh();
             List<NameStatusPair> items = sdb.getItemsSortedByUsage();
             add_items_to_view(items);
-            search_item.setText("");
-            search_item.setHint("SAR");
-        } else{
+                at_view.setText("");
+                at_view.setHint("SAR");
+                List<String> names = get_item_as_string(items);
+                update_data(names);
+
+        }
+        else{
             String day = day_select.getText().toString();
             reset_btn_color();
             sdb.set_food_to_day(global_food_view.getText().toString(), day);
@@ -630,8 +676,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         return false;
     }
+    List<String> get_item_as_string(List<NameStatusPair> item_list){
+        List<String> return_array = new ArrayList<>();
+        for(NameStatusPair item : item_list){
+            return_array.add(item.getName());
+        }
+        return return_array;
+    }
     private void get_random_day_food(){
-
         List<FoodDay> food_list = sdb.get_food_names();
         for (String s : day_food_to_show){
             Collections.shuffle(food_list);
@@ -651,6 +703,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         show_days_meal();
         Toast.makeText(MainActivity.this, "Random food is chosen!", Toast.LENGTH_LONG).show();
     }
+    public void update_data(List<String> item_array){
+        at_adapter.clear();
+        if(item_array != null){
+            for(String item_name : item_array){
+                at_adapter.insert(item_name, at_adapter.getCount());
+            }
+        }
+        at_adapter.notifyDataSetChanged();
+    }
     private void initialize(){
         handler = new Handler();
         list_view = findViewById(R.id.con_item_view);
@@ -658,11 +719,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buy_list = findViewById(R.id.con_item_view2);
         food_sum_view = findViewById(R.id.food_list_id);
         sdb = new DatabaseHelper(MainActivity.this);
-        search_item = findViewById(R.id.con_search_id);
+        at_view = findViewById(R.id.search_id);
         sc_view = findViewById(R.id.con_sc_id);
-        spinner = (Spinner)findViewById(R.id.spinner_id);
-        search_btn = findViewById(R.id.con_search_btn);
-        day_select = findViewById(R.id.con_day_id);
+        spinner = findViewById(R.id.spinner_id);
+        search_btn = findViewById(R.id.search_btn);
+        day_select = findViewById(R.id.day_id);
         week_view = findViewById(R.id.con_sun_id);
         day_select.setOnLongClickListener(this);
         week_view.setOnClickListener(this);
@@ -675,8 +736,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         day_food_to_show.add("Fr");
         day_food_to_show.add("Sa");
         day_food_to_show.add("Su");
-        adapter = ArrayAdapter.createFromResource(MainActivity.this, R.array.number_array , android.R.layout.simple_spinner_item );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter = ArrayAdapter.createFromResource(MainActivity.this, R.array.number_array , R.layout.spinner_list );
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown);
         spinner.setAdapter(adapter);
         one_btn = findViewById(R.id.one_con_id);
         two_btn = findViewById(R.id.two_con_id);
@@ -689,19 +750,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         list_of_ingredients = new StringBuilder();
         nine_btn = findViewById(R.id.nine_con_id);
         one_btn.setOnClickListener(this);
-        two_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.two_id);
-        three_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.three_id);
-        four_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.four_id);
-        five_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.five_id);
-        six_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.six_id);
-        seven_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.seven_id);
-        eight_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.eight_id);
-        nine_btn.setOnClickListener(this);// = fast_search_layout.findViewById(R.id.nine_id);
+        two_btn.setOnClickListener(this);
+        three_btn.setOnClickListener(this);
+        four_btn.setOnClickListener(this);
+        five_btn.setOnClickListener(this);
+        six_btn.setOnClickListener(this);
+        seven_btn.setOnClickListener(this);
+        eight_btn.setOnClickListener(this);
+        nine_btn.setOnClickListener(this);
         snooze_btn.setOnClickListener(this);
+        snooze_btn.setOnLongClickListener(this);
         day_select.setOnClickListener(this);
         food_sum_view.setOnClickListener(this);
         search_btn.setOnLongClickListener(this);
         search_btn.setOnClickListener(this);
         position_of_item = "1";
+        at_item = false;
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
