@@ -79,9 +79,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     // Add a new item
 
-    public void add_item(String name, int pos, int duration) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-        String date = sdf.format(new Date());
+    public void add_item(String name, int pos, int duration, String date) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues values = new ContentValues();
         values.put(COLUMN_NAME, name);
@@ -443,4 +441,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return itemList;
     }
+
 }

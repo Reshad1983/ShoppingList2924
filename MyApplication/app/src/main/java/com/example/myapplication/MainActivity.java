@@ -1,4 +1,5 @@
 package com.example.myapplication;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -6,6 +7,7 @@ import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -24,6 +26,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -109,17 +112,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         add_items_to_view(items);
         sort_list_view("-1");
-        startForegroundService(new Intent(this, CheckDataBase.class));
+        if(!isMyServiceRunning(CheckDataBase.class)){
+            startForegroundService(new Intent(this, CheckDataBase.class));
+        }
+    }
+    @SuppressWarnings("deprecation")
+    private boolean isMyServiceRunning(Class<?>serviceClass){
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for(ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)){
+            if(serviceClass.getName().equals(service.service.getClassName())){
+                return true;
+            }
+        }
+        return false;
     }
     private void sort_list_view(String pos) {
-       List<NameStatusPair> list = sdb.sort_buy_list(pos);
-        //buy_list.removeAllViews();
-        add_items_to_view(list);
+     List<NameStatusPair> items = sdb.sort_buy_list(pos);
+        buy_list.removeAllViews();
         handler.postDelayed(() -> {
             buy_list.removeAllViews();
             List<NameStatusPair> list1 = sdb.sort_buy_list("-1");
             add_items_to_view(list1);
-        },1000);
+        },300);
     }
     //----------------------------------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------------------------------
@@ -246,12 +260,26 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         TextView item_interval = itemView.findViewById(R.id.con_interval_id);
         TextView item_use = itemView.findViewById(R.id.usa_id);
         CheckBox cb = itemView.findViewById(R.id.checkBox_id);
+        TextView int_view = itemView.findViewById(R.id.interval_id);
+        TextView pos_view = itemView.findViewById(R.id.pos_id);
+        int_view.setText(item.get_interval());
+        int_view.setOnClickListener(v -> {
+            item_interval.setTextColor(Color.BLACK);
+            item_interval.setText("Interval -->>" );
+            handler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    item_interval.setTextColor(Color.BLACK);
+                    item_interval.setText(item.get_date());
+                }
+            },1000);
+        });
+        pos_view.setText(item.getPos());
         item_interval.setOnClickListener(v -> {
             if(!at_view.getText().toString().isEmpty()){
                 if(is_a_number(at_view.getText().toString())) {
                     sdb.update_interval( Integer.parseInt(at_view.getText().toString()), item.getName());
                     item.set_interval(at_view.getText().toString());
-                    item_interval.setTextColor(Color.BLACK);
                     item_interval.setText(item.get_date()+ " ");
                     num_of_days = 7;
                     Toast.makeText(MainActivity.this, "Interval updated", Toast.LENGTH_LONG).show();
@@ -266,24 +294,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 item.set_name(new_name);
                 Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
                 item_name.setText(item.getName());
-            }
-            else if(item.getStatus().equals("1")){
-                sdb.increment_usage_count(item.getName());
-                sdb.update_status(0, item.getName());
-                item.setStatus("0");
-                int usage = Integer.parseInt(item.getUsage()) + 1;
-                item.setUsage(usage + "" );
-                handler = new Handler();
-                handler.postDelayed(() -> {
-                    itemView.setBackgroundResource(R.drawable.bordered_transparent);
-                    if(itemView.getParent() != null){
-                        ((ViewGroup)itemView.getParent()).removeView(itemView);
-                    }
-                    buy_list.removeView(itemView);
-                    View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                    addItemToLayout(mitemView, item, -1);
-                }, 500);
-                Toast.makeText(MainActivity.this, "Usage updated!", Toast.LENGTH_SHORT).show();
             }
             else{
                 if(cb.isChecked()){
@@ -309,32 +319,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         item_name.setOnClickListener(v -> {
             if(item.getStatus().equals("0")){
-                item_interval.setBackgroundResource(R.drawable.unchecked);
-                sdb.update_status(1, item.getName());
-                item.setStatus("1");
+                itemView.setBackgroundResource(R.drawable.unchecked);
                 list_view.removeView(itemView);
-                View itemView_at = getLayoutInflater().inflate(R.layout.item_layout, null, false);
-                addItemToLayout(itemView_at, item, 0);
-                handler.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        refresh();
-                        List<NameStatusPair> items_after_at = sdb.getItemsSortedByPosition();
-                        add_items_to_view(items_after_at);
-                        sort_list_view("-1");
-                    }
-                }, 400);
+                item.setStatus("1");
+                buy_list.removeAllViews();
+                sdb.update_status(1, item.getName());
+                View vItemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
+                addItemToLayout(vItemView, item, 0);
+               handler.postDelayed(() -> {
+               List<NameStatusPair> at_items_to_insert = sdb.getItemsSortedByUsage();
+               if(at_item){
+                   at_item = false;
+                   add_items_to_view(at_items_to_insert);
+                   sort_list_view("-1");
+               }
+               else{
+                   sort_list_view( "-1");
+               }
+               }, 400);
 
             }
             else if(item.getStatus().equals("1")){
-                SimpleDateFormat sdf = new SimpleDateFormat("E");
-                String date_string = sdf.format(new Date());
-                if((date_string.equals("fre")) || (date_string.equals("Fri"))){
-                    Date date = new Date();
-                    Date  lDate = new Date();
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Object[] setting = get_correct_date();
+                if((boolean)setting[0]){
+                    Date lDate = new Date();
                     boolean null_date = false;
-                    sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    date_string = sdf.format(date);
                     if(item.get_date() == null){
                         null_date = true;
                     }
@@ -346,26 +356,37 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }
                     }
                     assert lDate != null;
-                    long difference = Math.abs(date.getTime() - lDate.getTime());
+                    long difference = Math.abs(((Date)setting[1]).getTime() - lDate.getTime());
                     long differenceDates = difference / (24 * 60 * 60 * 1000);
                     if((int)differenceDates >= 7 || null_date){
                         sdb.update_interval((int)differenceDates, item.getName());
-                        sdb.update_date(date_string, item_name.getText().toString());
                         item.set_interval((int)differenceDates + "");
                         Toast.makeText(MainActivity.this, "Interval: " + (int)differenceDates, Toast.LENGTH_LONG).show();
-                        item_interval.setText(date_string);
-                        item.set_date(date_string);
                     }
-                }
+                    sdb.update_date((String)setting[2], item_name.getText().toString());
+                    item.set_date((String)setting[2]);
+
+                    }
                 else{
-                    itemView.setBackgroundResource(R.drawable.checked);
+                        Toast.makeText(MainActivity.this, "Usage incremented!", Toast.LENGTH_LONG).show();
+                    }
+                    item.setStatus("0");
+                    item.setUsage(Integer.parseInt(item.getUsage()) + 1 + "");
                     sdb.update_status(0, item.getName());
                     sdb.increment_usage_count(item.getName());
-                    item.setStatus("0");
+                    if(!(boolean)setting[0]){
+                        int_view.setBackgroundResource(R.drawable.checked);
+                    }else {
+                        itemView.setBackgroundResource(R.drawable.checked);
+                    }
                     handler = new Handler();
-                    Toast.makeText(MainActivity.this, "Usage added!", Toast.LENGTH_LONG).show();
-                    handler.postDelayed(() -> {
-                        itemView.setBackgroundResource(R.drawable.bordered_transparent);
+                boolean finalUpdate_last_buy = (boolean)setting[0];
+                handler.postDelayed(() -> {
+                        if(!finalUpdate_last_buy){
+                            int_view.setBackgroundResource(R.drawable.rounded_corner2);
+                        }else {
+                            itemView.setBackgroundResource(R.drawable.bordered_transparent);
+                        }
                         if(itemView.getParent() != null){
                             ((ViewGroup)itemView.getParent()).removeView(itemView);
                         }
@@ -373,22 +394,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                         addItemToLayout(mitemView, item, -1);
                     }, 500);
-
-                }
-
             }
         });
         item_name.setText(item.getName());
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             item_name.setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_LOOSE);
         }
-        item_interval.setTextColor(Color.BLACK);
         item_interval.setText(item.get_date());
         item_interval.setOnClickListener(v -> {
             if (item.getStatus().equals("1")) {
                 sdb.update_status(0, item.getName());
                 item.setStatus("0");
-                item_name.setTextColor(Color.BLACK);
                 itemView.setBackgroundResource(R.drawable.bordered_transparent);
                 buy_list.removeView(itemView);
                 View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
@@ -397,20 +413,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         });
             item_interval.setOnLongClickListener(v -> {
-                Date date = new Date();
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                String date_string = sdf.format(date);
+                Object[] objects = get_correct_date();
+                String date_string = (String)objects[2];
                 sdb.update_status(0, item.getName());
                 sdb.update_date(date_string, item_name.getText().toString());
-                Toast.makeText(MainActivity.this, "Item snoozed", Toast.LENGTH_LONG).show();
                 item.setStatus("0");
                 item.set_date(date_string);
                 buy_list.removeView(itemView);
                 View mitemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                 addItemToLayout(mitemView, item, -1);
+                Toast.makeText(MainActivity.this, "Item snoozed", Toast.LENGTH_LONG).show();
                 return false;
             });
-        item_use.setTextColor(Color.BLACK);
         item_use.setText(item.getUsage());
         String rare_buy_item = item.get_rare_item();
         if(rare_buy_item == null){
@@ -436,13 +450,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
         switch (item.getStatus()) {
             case "0":
-                item_name.setTextColor(Color.BLACK);
                 itemView.setBackgroundResource(R.drawable.bordered_transparent);
                 list_view.addView(itemView, Integer.parseInt(item.getPrio()));
                 item.set_prio("0");
                 break;
             case "1":
-                item_name.setTextColor(Color.BLACK);
+
                 itemView.setBackgroundResource(R.drawable.bordered_transparent);
                 item_interval.setBackgroundResource(R.drawable.unchecked);
                 if(pos == -1){
@@ -453,6 +466,84 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
         }
+    }
+
+    private Object[] get_correct_date() {
+        Object [] return_array = new Object[3];
+        SimpleDateFormat sdf = new SimpleDateFormat("E");
+        Date date = new Date();
+        String date_string = sdf.format(date);
+        long l;
+        Calendar c = Calendar.getInstance();
+        sdf = new SimpleDateFormat("yyyy-MM-dd");
+        switch (date_string) {
+            case "fre":
+            case "Fri":
+                return_array[0] = true;
+                break;
+            case "Sun":
+            case "sön": {
+                c.setTime(date); // Using today's date
+                c.add(Calendar.DATE, -2); // Adding 5 days
+                l = c.getTimeInMillis();
+                return_array[0] = true;
+                return_array[1] = new Date(l);
+                return_array[2] = sdf.format(c.getTime());
+                break;
+            }
+            case "Thu":
+            case "tors": {
+                c.setTime(date); // Using today's date
+                c.add(Calendar.DATE, 1); // Adding 5 days
+                l = c.getTimeInMillis();
+                return_array[0] = true;
+                return_array[1] = new Date(l);
+                return_array[2] = sdf.format(c.getTime());
+                break;
+            }
+
+            case "Sat":
+            case "lör": {
+                c.setTime(date); // Using today's date
+                c.add(Calendar.DATE, -1); // Adding 5 days
+                l = c.getTimeInMillis();
+                return_array[0] = true;
+                return_array[1] = new Date(l);
+                return_array[2] = sdf.format(c.getTime());
+                break;
+            }
+            case "Wed":
+            case "ons": {
+                c.setTime(date); // Using today's date
+                c.add(Calendar.DATE, 2); // Adding 5 days
+                l = c.getTimeInMillis();
+                return_array[0] = false;
+                return_array[1] = new Date(l);
+                return_array[2] = sdf.format(c.getTime());
+                break;
+            }
+            case "tis":
+            case "Tue": {
+                c.setTime(date); // Using today's date
+                c.add(Calendar.DATE, 3); // Adding 5 days
+                l = c.getTimeInMillis();
+                return_array[0] = false;
+                return_array[1] = new Date(l);
+                return_array[2] = sdf.format(c.getTime());
+                break;
+            }
+            case "Mon":
+            case "mån": {
+                c.setTime(date); // Using today's date
+                c.add(Calendar.DATE, -3); // Adding 5 days
+                l = c.getTimeInMillis();
+                return_array[0] = false;
+                return_array[1] = new Date(l);
+                return_array[2] = sdf.format(c.getTime());
+                break;
+            }
+        }
+        return return_array;
     }
 
     private boolean is_a_number(String string) {
@@ -478,9 +569,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 CheckBox cb = item_view.findViewById(R.id.checkBox_id);
                 TextView item_name = item_view.findViewById(R.id.con_item_id);
                 if(cb.isChecked()){
-                    Date date = new Date();
-                    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-                    String date_string = sdf.format(date);
+                    String date_string = (String)get_correct_date()[2];
                     sdb.update_status(0, item_name.getText().toString());
                     sdb.update_date(date_string, item_name.getText().toString());
                     NameStatusPair item = sdb.find_item_from_db(item_name.getText().toString());
@@ -524,8 +613,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     items = sdb.getItemsSortedByUsage();
                 }
                 add_items_to_view(items);
-                sorting = !sorting;
                 sort_list_view("-1");
+                sorting = !sorting;
                 at_view.setHint("SAR");
                 items.clear();
             } else {
@@ -637,7 +726,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onLongClick(View v) {
-        List<NameStatusPair>search_items = new ArrayList<>();
         int btn_id = v.getId();
             if(btn_id == R.id.con_sun_id){
             refresh();
@@ -671,7 +759,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 Toast.makeText(MainActivity.this, "Status reset!", Toast.LENGTH_LONG).show();
             } else{
                 reset_btn_color();
-                sdb.add_item(search_text, Integer.parseInt(position_of_item), 1);
+                sdb.add_item(search_text, Integer.parseInt(position_of_item), 1, (String)get_correct_date()[2]);
                 Toast.makeText(this, "Item added!!", Toast.LENGTH_LONG).show();
             }
             refresh();
@@ -680,7 +768,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 at_view.setText("");
                 at_view.setHint("SAR");
                 List<String> names = get_item_as_string(items);
-                update_data(names);
+
 
         }
         else{
