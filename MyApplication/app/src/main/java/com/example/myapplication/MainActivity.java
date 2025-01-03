@@ -7,7 +7,6 @@ import android.graphics.text.LineBreakConfig;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -480,6 +479,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case "fre":
             case "Fri":
                 return_array[0] = true;
+                return_array[1] = new Date();
+                return_array[2] = sdf.format(c.getTime());
                 break;
             case "Sun":
             case "sön": {

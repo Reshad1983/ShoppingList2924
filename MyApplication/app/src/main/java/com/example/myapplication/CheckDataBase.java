@@ -61,7 +61,7 @@ public class CheckDataBase extends Service {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
                 String today_date = sdf.format(new Date());
                 String first_time_to_insert = myPre.getString(FIRST_DATE, "");
-         if(!today_date.equals(first_time_to_insert)){
+         if(!today_date.equals(first_time_to_insert)){ //!today_date.equals(first_time_to_insert
               SharedPreferences.Editor editor = myPre.edit();
               editor.putString(FIRST_DATE, today_date);
               editor.apply();
@@ -84,10 +84,12 @@ public class CheckDataBase extends Service {
                           sdf = new SimpleDateFormat("yyyy-MM-dd");
                           String buy_date_to_now = sdf.format(c.getTime());
                           today_date = sdf.format(new Date());
-                          if (((today_date.compareTo(buy_date_to_now) > 0)) && (item.get_rare_item().equals("0"))) {
-                              dbh.update_status(1, item.getName());
-                              Log.d("Handlers", "Time to buy");
-                              message.append("\n").append(item.getName());
+                          if (((today_date.compareTo(buy_date_to_now) >= 0)) && item.get_rare_item().equals("0")) {
+                              if(item.getStatus().equals("0")) {
+                                  dbh.update_status(1, item.getName());
+                                  Log.d("Handlers", "Time to buy");
+                                  message.append("\n").append(item.getName());
+                              }
                           }
                       }
                   }
@@ -95,7 +97,7 @@ public class CheckDataBase extends Service {
               }
                     updateNotification(message.toString());
                     Log.d("Handlers", "Message updated.");
-                handler.postDelayed(this, 7200000);
+                handler.postDelayed(this, 7200000);//
             }
         };
         handler.post(runnable_task);
