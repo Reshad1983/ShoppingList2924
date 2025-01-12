@@ -17,10 +17,6 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="31">
-        <service
-            android:name=".CheckDataBase"
-            android:foregroundServiceType="dataSync"
-            android:exported="false"></service>
 
         <activity
             android:name=".MainActivity"
