@@ -24,7 +24,7 @@
         android:layout_marginStart="4dp"
         android:layout_marginTop="50dp"
         android:background="@drawable/hole_view"
-        android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÅabcdefghijklmnopqrstuvwxyzåöä "
+
         android:inputType="text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />

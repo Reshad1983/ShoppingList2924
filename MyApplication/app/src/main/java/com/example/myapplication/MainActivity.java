@@ -93,7 +93,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void update_items(){
-
         List<NameStatusPair> items;
         items = sdb.getItemsSortedByUsageForBuyCheck();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -277,21 +276,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
  */
     public void addItemToLayout(View itemView, NameStatusPair item, int pos){
         TextView item_name = itemView.findViewById(R.id.con_item_id);
+        TextView item_comment = itemView.findViewById(R.id.comment_id);
         TextView item_interval = itemView.findViewById(R.id.con_interval_id);
         TextView item_use = itemView.findViewById(R.id.usa_id);
         CheckBox cb = itemView.findViewById(R.id.checkBox_id);
         TextView int_view = itemView.findViewById(R.id.interval_id);
         TextView pos_view = itemView.findViewById(R.id.pos_id);
         int_view.setText(item.get_interval());
-        int_view.setOnClickListener(v -> {
-            item_interval.setText("Interval -->>" );
-            handler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    item_interval.setText(item.get_date());
-                }
-            },1000);
-        });
         pos_view.setText(item.getPos());
         item_interval.setOnClickListener(v -> {
             if(!at_view.getText().toString().isEmpty()){
@@ -305,10 +296,32 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         });
+        item_comment.setOnLongClickListener(v -> {
+                String comment = at_view.getText().toString();
+                if(item.getName().split("-").length > 2){
+                    String temp_name = item.getName().split("-")[0] + "-" + item.getName().split("-")[1];
+                    sdb.update_item_name(temp_name + "-" + comment , item.getName());
+                    item.set_name(item.getName().split("-")[0] + "-" + item.getName().split("-")[1]);
+                }
+                if(item.getName().contains("-")){
+
+                    String just_name = item.getName().split("-")[0];
+                    sdb.update_item_name(just_name + "-" + comment , item.getName());
+                }
+                else {
+                        sdb.update_item_name(item.getName() + "-" + comment , item.getName());
+                }
+                Toast.makeText(MainActivity.this, "Item comment updated!", Toast.LENGTH_SHORT).show();
+                item_name.setText(item.getName().split("-")[0]);
+                item_comment.setText(comment);
+                at_view.setText("");
+
+            return false;
+        });
         item_name.setOnLongClickListener(v -> {
             if(!at_view.getText().toString().isEmpty()){
                 String new_name = at_view.getText().toString();
-                sdb.update_item_name(new_name , item.getName());
+                sdb.update_item_name(new_name , item.getName()+"-"+item_comment.getText().toString());
                 item.set_name(new_name);
                 Toast.makeText(MainActivity.this, "Item name updated!", Toast.LENGTH_SHORT).show();
                 item_name.setText(item.getName());
@@ -341,7 +354,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 list_view.removeView(itemView);
                 item.setStatus("1");
                 buy_list.removeAllViews();
-                sdb.update_status(1, item.getName());
+                if((!item_comment.getText().toString().equals("example")) && (!item_comment.getText().toString().isEmpty()) && (!item.getName().contains("-"))){
+                    sdb.update_status(1, item.getName()+"-"+item_comment.getText().toString());
+                    item.set_name(item.getName()+"-"+item_comment.getText().toString());
+                }
+                else{
+                    sdb.update_status(1, item.getName());
+                }
                 View vItemView = getLayoutInflater().inflate(R.layout.item_layout, null, false);
                 addItemToLayout(vItemView, item, 0);
                handler.postDelayed(() -> {
@@ -420,7 +439,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         }, 500);
             }
         });
-        item_name.setText(item.getName());
+        if(item.getName().contains("-")){
+            String [] name_comment = item.getName().split("-");
+            item_name.setText(name_comment[0]);
+            if(name_comment.length > 1){
+                item_comment.setText(name_comment[1]);
+            }
+        }
+        else {
+            item_name.setText(item.getName());
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             item_name.setLineBreakStyle(LineBreakConfig.LINE_BREAK_STYLE_LOOSE);
         }
@@ -777,7 +805,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 at_view.setText("");
                 Toast.makeText(MainActivity.this, "New food added!", Toast.LENGTH_SHORT).show();
             }
-        }else if (btn_id == R.id.search_btn) {
+        }
+            else if (btn_id == R.id.comment_id) {
+
+            }
+            else if (btn_id == R.id.search_btn) {
             //Reset all status if nothing enter
             String search_text = at_view.getText().toString();
             if (search_text.isEmpty()) {

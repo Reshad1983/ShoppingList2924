@@ -1,76 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <TextView
         android:id="@+id/con_item_id"
-        android:layout_width="140dp"
+        android:layout_width="191dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="1dp"
+        android:background="@android:color/transparent"
+        android:paddingStart="15dp"
+        android:paddingTop="1dp"
+        android:paddingEnd="3dp"
+        android:paddingBottom="2dp"
+        android:text="example"
+        android:textColor="@color/black"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/comment_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/comment_id"
+        android:layout_width="193dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:background="@android:color/transparent"
-        android:paddingStart="25dp"
+        android:paddingStart="10dp"
         android:paddingEnd="3dp"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp"
-        android:textSize="13sp"
-        app:layout_constraintBottom_toTopOf="@+id/con_interval_id"
-        app:layout_constraintEnd_toStartOf="@+id/checkBox_id"
-        android:text="example textghth"
-        android:textColor="@color/black"
+        android:paddingBottom="1dp"
+        android:layout_marginEnd="10dp"
+        android:layout_marginStart="10dp"
+        android:text="example"
+        android:textColor="@color/dark_grey"
+        android:textSize="11sp"
+        android:textStyle="italic"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/con_item_id" />
     <TextView
         android:id="@+id/pos_id"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
         android:layout_marginTop="2dp"
         android:background="@drawable/rounded_corner2"
         android:gravity="center"
+        android:layout_marginStart="10dp"
+        android:layout_marginEnd="20dp"
         android:textSize="10sp"
         android:textColor="@color/black"
-        app:layout_constraintBottom_toBottomOf="@+id/con_item_id"
         app:layout_constraintStart_toStartOf="@+id/con_item_id"
-        app:layout_constraintTop_toTopOf="@+id/con_item_id" />
+        app:layout_constraintTop_toBottomOf="@+id/comment_id"
+        app:layout_constraintBottom_toTopOf="@+id/con_interval_id"
+        />
 
     <TextView
         android:id="@+id/con_interval_id"
-        android:layout_width="140dp"
+        android:layout_width="170dp"
         android:layout_height="30dp"
         android:layout_marginTop="2dp"
-        android:layout_marginEnd="2dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginStart="5dp"
         android:background="@drawable/rounded_corner"
         android:paddingStart="15dp"
-        android:paddingTop="5dp"
+        android:paddingEnd="15dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"
         android:textColor="@color/black"
-        android:paddingBottom="3dp"
         android:textSize="12sp"
-        app:layout_constraintEnd_toStartOf="@+id/usa_id"
-        app:layout_constraintStart_toStartOf="@+id/con_item_id"
-        app:layout_constraintTop_toBottomOf="@id/con_item_id" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/comment_id"
+        app:layout_constraintTop_toBottomOf="@+id/pos_id"/>
 
     <TextView
         android:id="@+id/usa_id"
-        android:layout_width="23sp"
+        android:layout_width="30sp"
         android:layout_height="30dp"
         android:layout_marginEnd="4dp"
-        android:background="@drawable/bordered_transparent"
+        android:background="@drawable/rounded_corner2"
         android:gravity="center"
         android:padding="4dp"
         android:textSize="10sp"
         android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/con_interval_id" />
+        app:layout_constraintTop_toTopOf="@+id/pos_id"
+        app:layout_constraintEnd_toStartOf="@+id/checkBox_id"
+        />
 
     <CheckBox
         android:id="@+id/checkBox_id"
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:textColor="@color/black"
-        app:layout_constraintEnd_toEndOf="@+id/usa_id"
-        app:layout_constraintStart_toEndOf="@+id/con_item_id"
-        app:layout_constraintTop_toTopOf="@+id/con_item_id" />
+        app:layout_constraintBottom_toTopOf="@+id/con_interval_id"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/pos_id" />
 
     <TextView
         android:id="@+id/interval_id"
